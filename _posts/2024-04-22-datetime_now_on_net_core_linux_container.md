@@ -51,8 +51,34 @@ public static class BackgroundJob
     }
 }
 ```
+
 در کد بالا این بخش اضافه شده است و مهم است:  
 
 ```csharp
 q.UseTimeZoneConverter()
 ```
+
+در حالت استفاده دستی از کتابخانه `Quartz `
+
+```csharp
+var tehranTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Tehran");
+
+var trigger = TriggerBuilder.Create()
+    .WithIdentity("ApiCallTrigger", "ApiGroup")
+    .WithCronSchedule(cronExpression, x => x.InTimeZone(tehranTimeZone))
+    .Build();
+```
+
+همچنین در داخل فایل `docker-compose.yml` نیز می‌توانید بخش زیر را اضافه کنید:  
+
+```yml
+services:
+  myapp:
+    image: image
+    container_name: myapp
+    environment:
+      - TZ=Asia/Tehran
+```
+
+در کد بالا مقدار `TZ=Asia/Tehran` مهم است.  
+
