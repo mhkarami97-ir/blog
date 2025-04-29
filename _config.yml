@@ -89,11 +89,11 @@ comments:
 # disqus: "mhkarami97"  
 
 # Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking
-google_analytics: "G-DZM25ZLKRP"
+google_analytics: "G-2KGKGYQR60"
 analytics:
   provider: "google-gtag"
   google:
-    tracking_id: "G-DZM25ZLKRP"
+    tracking_id: "G-2KGKGYQR60"
     anonymize_ip: false # default
     
 google_site_verification: "BVwx9je8Sv6HbUTtZ4yJrPvJLZzE0wEsPS2VJHQzOKo"    
