@@ -311,3 +311,45 @@ dotnet format src/prj/My.sln --no-restore --include $staged_files
 همچنین نیاز است آدرس `sln` نیز در آن مشخص شود.  
 
 در صورتی که دستور آخر را از کامنت خارج کنید مرتب‌سازی اعمال شده در همان کامیت زده شده و می‌رود اما اگر کامیت باشد تغییرات انجام شده را می‌توانید مشاهده کنید و سپس بصورت جدا کامیت کنید.  
+
+در صورتی که به صورت تیم کار می‌کنید نیاز است یکبار پس از دریافت سورس پروژه در بخش بیس که پوشه `.config` وجود دارد 2 دستور زیر زده شود تا بر روی سیستم آنها نیز عملیات فوق انجام شود:  
+
+```
+dotnet tool restore
+
+dotnet husky install
+```
+
+و یا می‌توانید کد زیر را به فایل `csproj` اجرایی پروژه خود اضافه کنید تا عملیات فوق انجام شود:  
+
+```
+<Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
+  <Exec Command="dotnet tool restore" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="$(MSBuildProjectDirectory)/../../.."/>
+  <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="$(MSBuildProjectDirectory)/../../.."/>
+  <Message Text=">>> Running Husky attach target" Importance="High" />
+</Target>
+```
+
+دقت کنید که در دستور بالا نیاز است مقدار `WorkingDirectory` را به محلی که فایل `.config` وجود دارد تغییر دهید.  
+همچنین نیاز است در پایپ لاین خود مقدار `Husky : 0` را اضافه کنید تا در CI/CD دستور فوق اجرا نشود
+نمونه:  
+
+```yml
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    command: restore
+    projects: Host.csproj
+  env:
+    HUSKY: 0
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    projects: Host.csproj
+    arguments: --no-restore
+  env:
+    HUSKY: 0
+```
+

@@ -567,7 +567,6 @@ M:System.DateTime.UtcNow -> Use IClock.UtcNow or another abstraction.
 <configuration>
   <packageSources>
     <clear />
-    <add key="Private" value="https://repo.my.ir/public/nuget/index.json" />
     <add key="NuGetOrg" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
 </configuration>
