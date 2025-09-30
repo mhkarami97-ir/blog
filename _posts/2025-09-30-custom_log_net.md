@@ -11,7 +11,7 @@ tags:
 اگه نیاز دارید که متود دلخواه خودتون برای لاگ زدن رو داشته باشید و یا بطور مثال زمان زدن لاگ خطا یک عملیات دیگه مثل Trace هم انجام بدید می‌تونید از Extension Method استفاده کنید و کارکرد ILogger رو افزایش بدید.  
 برای این کار کافیه متودی شبیه به زیر بنویسید:  
 
-```net
+```
 public static class LoggerExtensions
 {
     public static void LogCustomError(this ILogger logger, Exception ex, string message)
@@ -24,7 +24,7 @@ public static class LoggerExtensions
 
 و بعدش جاهی مختلف برنامه بهش دسترسی دارید و می‌تونید ازش استفاده کنید. نمونه استفاده:  
 
-```net
+```
 try {
 
 }
