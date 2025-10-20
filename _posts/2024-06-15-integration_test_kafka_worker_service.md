@@ -248,7 +248,7 @@ public class DatabaseFixture : IAsyncLifetime
         dacDeployOptions.SqlCommandVariableValues.Add("DefaultDataPath", "/var/opt/mssql/data/");
         dacDeployOptions.SqlCommandVariableValues.Add("DefaultLogPath", "/var/opt/mssql/log/");
 
-        service.Deploy(dac, "OrderManagementSystem", false, dacDeployOptions);
+        service.Deploy(dac, "System", false, dacDeployOptions);
     }
 
     private string GetDacPacPath()

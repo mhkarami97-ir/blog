@@ -173,73 +173,30 @@ DEALLOCATE cTable
 
 در کوئری بالا موارد `NOT IN` و `NOT LIKE` مواردی است که می‌خواهیم آنها را در سیستم حفظ کنیم.  
 
-کوئری‌های زیر نیز از سطح اینترنت جمع‌آوری شده است:  
+برای ایجاد کوئری پاک کردن تمام کلیدهای خارجی و ایجاد دوباره آنها می‌توانید از کد زیر استفاده کنید
 
 ```sql
-To get all foreign key relationships referencing your table, you could use this SQL (if you're on SQL Server 2005 and up):
+DECLARE @sql NVARCHAR(MAX) = '';
+SELECT @sql = @sql + 'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id)) + 
+                     '.' + QUOTENAME(OBJECT_NAME(parent_object_id)) + 
+                     ' DROP CONSTRAINT ' + QUOTENAME(name) + ';' + CHAR(13)
+FROM sys.foreign_keys;
 
-SELECT * 
-FROM sys.foreign_keys
-WHERE referenced_object_id = object_id('Student')
-and if there are any, with this statement here, you could create SQL statements to actually drop those FK relations:
-
-SELECT 
-    'ALTER TABLE [' +  OBJECT_SCHEMA_NAME(parent_object_id) +
-    '].[' + OBJECT_NAME(parent_object_id) + 
-    '] DROP CONSTRAINT [' + name + ']'
-FROM sys.foreign_keys
-WHERE referenced_object_id = object_id('Student')
+SELECT @sql;
 ```
 
 
 ```sql
-Here is another way to drop all tables correctly, using sp_MSdropconstraints procedure. The shortest code I could think of:
+DECLARE @sql NVARCHAR(MAX) = '';
+SELECT @sql = @sql + 'ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.parent_object_id)) +
+                     '.' + QUOTENAME(OBJECT_NAME(fk.parent_object_id)) +
+                     ' ADD CONSTRAINT ' + QUOTENAME(fk.name) +
+                     ' FOREIGN KEY (' + COL_NAME(fc.parent_object_id, fc.parent_column_id) + ') ' +
+                     ' REFERENCES ' + QUOTENAME(OBJECT_SCHEMA_NAME(fk.referenced_object_id)) +
+                     '.' + QUOTENAME(OBJECT_NAME(fk.referenced_object_id)) +
+                     '(' + COL_NAME(fc.referenced_object_id, fc.referenced_column_id) + ');' + CHAR(13)
+FROM sys.foreign_keys AS fk
+JOIN sys.foreign_key_columns AS fc ON fk.object_id = fc.constraint_object_id;
 
-exec sp_MSforeachtable "declare @name nvarchar(max); set @name = parsename('?', 1); exec sp_MSdropconstraints @name";
-exec sp_MSforeachtable "drop table ?";
+SELECT @sql;
 ```
-
-
-```sql
-execute the below code to get the foreign key constraint name which blocks your drop. For example, I take the roles table.
-
-      SELECT *
-      FROM sys.foreign_keys
-      WHERE referenced_object_id = object_id('roles');
-
-      SELECT name AS 'Foreign Key Constraint Name',
-      OBJECT_SCHEMA_NAME(parent_object_id) + '.' + OBJECT_NAME(parent_object_id)
-      AS 'Child Table' FROM sys.foreign_keys
-      WHERE OBJECT_SCHEMA_NAME(referenced_object_id) = 'dbo'
-      AND OBJECT_NAME(referenced_object_id) = 'dbo.roles'
-you will get the FK name something as below : FK__Table1__roleId__1X1H55C1
-
-now run the below code to remove the FK reference got from above.
-
-ALTER TABLE dbo.users drop CONSTRAINT FK__Table1__roleId__1X1H55C1;
-```
-
-
-```sql
-In SQL Server Management Studio 2008 (R2) and newer, you can Right Click on the
-
-DB -> Tasks -> Generate Scripts
-
-Select the tables you want to DROP.
-
-Select "Save to new query window".
-
-Click on the Advanced button.
-
-Set Script DROP and CREATE to Script DROP.
-
-Set Script Foreign Keys to True.
-
-Click OK.
-
-Click Next -> Next -> Finish.
-
-View the script and then Execute.
-```
-
-البته کوئری‌های بالا تست نشده‌اند و فقط کوئری اول که توضیح داده شد تست شده است.  

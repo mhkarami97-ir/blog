@@ -18,14 +18,39 @@ function onOpen(e) {
    installTrigger();
 };
 
+function listTriggers() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    Logger.log(`Trigger ID: ${trigger.getUniqueId()}, Handler: ${trigger.getHandlerFunction()}`);
+  });
+}
+
+function deleteTriggers() {
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    ScriptApp.deleteTrigger(trigger);
+  });
+}
+
 // Function to install the onEdit trigger
 function installTrigger() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet();
-  ScriptApp.newTrigger('sendEmailOnEdit')
-           .forSpreadsheet(sheet)
-           .onEdit()
-           .create();
+  const triggers = ScriptApp.getProjectTriggers();
+  
+  // Check if the trigger already exists
+  const existingTrigger = triggers.some(trigger => 
+    trigger.getHandlerFunction() === 'sendEmailOnEdit'
+  );
+  
+  if (!existingTrigger) {
+    ScriptApp.newTrigger('sendEmailOnEdit')
+             .forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet())
+             .onEdit()
+             .create();
+  }
 }
+
+// Global variable to store processed changes
+let processedChanges = [];
 
 // Function to send email on edit
 function sendEmailOnEdit(e) {
@@ -40,7 +65,16 @@ function sendEmailOnEdit(e) {
   const headerRange = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
   const header = headerRange[column-1];
 
-  if(header !== 'توضیح'){
+  if (header !== 'توضیح' || newValue === oldValue) {
+    return;
+  }
+
+  // Check if the change has already been processed
+  const changeId = `${sheet.getName()}_${row}_${column}_${newValue}`;
+  const cache = CacheService.getScriptCache();
+  const cachedChange = cache.get(changeId);
+  
+  if (cachedChange) {
     return;
   }
 
@@ -56,7 +90,6 @@ function sendEmailOnEdit(e) {
       <p>نام شیت: ${sheet.getName()}</p>
       <p>ردیف: ${row}</p>
       <p>مقدار: ${newValue}</p>
-      <p>ویرایش توسط: ${Session.getActiveUser().getEmail()}</p>
     </div>
   `;             
 
@@ -68,6 +101,9 @@ function sendEmailOnEdit(e) {
       htmlBody: body
     });
  });
+
+  // Cache the changeId to avoid sending duplicate emails
+  cache.put(changeId, 'processed', 3600); // Cache it for 1 hour
 }
 
 // Function to determine the type of change
@@ -90,12 +126,10 @@ function getChangeType(e) {
 function getAllUserEmails() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet();
   const editors = sheet.getEditors();
-  //const owner = sheet.getOwner();
   
   const emails = new Set();
 
   editors.forEach(editor => emails.add(editor.getEmail()));
-  //emails.add(owner.getEmail());
 
   return Array.from(emails);
 }
@@ -104,3 +138,7 @@ function getAllUserEmails() {
 این کد ایمیل تمام افرادی که به فایل دسترسی دارند را بدست می‌آوردن و در صورت تغییر به آنها ایمیل ارسال می‌کند.  
 اکنون بر روی Save کلیک کنید. سپس از همان بالا که لیست متودها را نشان می‌دهد یکبار OpOpen را انتخاب کنید و سپس ر روی Run کلیک کنید.  
 با اینکار پنجره‌ای برای گرفتن دسترسی باز می‌شود که باید آن را تایید کنید. همچنین با توجه به اینکه حساب شما تایید شده توسط گوگل نیست نیز ممکن است هشدار داده شود که آن را نیز می‌توانید با unsafe تایید کنید.  
+
+در کد بالا از cache استفاده شده است تا از ارسال چندباره جلوگیری شود. همچنین زمان install trigger نیز این مورد بررسی شده است.  
+توسط listTriggers و deleteTriggers می‌توانید کد خود را دیباگ کنید تا اگر از قبل تریگری وجود داشت حذف شود تا ایمیل چندبار ارسال نشود.  
+همچنین فقط تغییرات ستون با عنوان توضیح در این کد مدیریت شده است تا ایمیل برای آن ارسال شود که می‌توانید آن را تغییر دهید.  
