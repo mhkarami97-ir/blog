@@ -464,6 +464,16 @@ dotnet_diagnostic.CA1069.severity = error
 dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
 dotnet_style_allow_multiple_blank_lines_experimental = false:error
 dotnet_style_allow_statement_immediately_after_block_experimental = false:error
+
+dotnet_naming_rule.async_methods_end_with_async.severity = error
+dotnet_naming_rule.async_methods_end_with_async.symbols = async_methods
+dotnet_naming_rule.async_methods_end_with_async.style = end_with_async
+dotnet_naming_symbols.async_methods.applicable_kinds = method
+dotnet_naming_symbols.async_methods.required_modifiers = async
+dotnet_naming_symbols.required_return_types = Task, Task<>
+dotnet_naming_symbols.async_methods.applicable_accessibilities = *
+dotnet_naming_style.end_with_async.required_suffix = Async
+dotnet_naming_style.end_with_async.capitalization = pascal_case
 ```
 
 مواردی که در زمان کامیت جز تغییرات نمی‌آیند
