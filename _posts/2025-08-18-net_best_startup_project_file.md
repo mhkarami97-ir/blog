@@ -460,6 +460,7 @@ dotnet_diagnostic.CS8019.severity = error
 dotnet_diagnostic.CS0105.severity = error
 dotnet_diagnostic.CA1021.severity = error
 dotnet_diagnostic.CA1069.severity = error
+resharper_property_can_be_made_init_only_global_highlighting = error
 
 dotnet_style_prefer_collection_expression = when_types_loosely_match:suggestion
 dotnet_style_allow_multiple_blank_lines_experimental = false:error
