@@ -1,4 +1,17 @@
-﻿@media (min-width: 80em) {
+﻿@import url("../fonts/Vazirmatn-font-face.css");
+
+* {
+    font-family: Vazirmatn, Tahoma, serif !important;
+}
+
+body,
+html,
+button,
+input {
+    font-family: Vazirmatn, Tahoma, serif !important;
+}
+
+@media (min-width: 80em) {
   .archive {
     padding-right: 10px;
     padding-inline-end: 10px;
