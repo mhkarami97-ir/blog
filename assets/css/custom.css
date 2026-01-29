@@ -1,0 +1,29 @@
+.pagination {
+  direction: ltr;
+}
+
+.post-navigation .btn:first-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.post-navigation .btn:last-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.code-header::before {
+  display: none !important;
+}
+
+.nav-item {
+  margin-right: 0;
+}
+
+#sidebar .site-subtitle {
+  text-align: center;
+}
+
+#sidebar .site-title {
+  font-weight: 700;
+  margin-right: auto;
+  margin-left: auto;
+}

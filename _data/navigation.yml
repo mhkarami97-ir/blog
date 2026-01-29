@@ -1,9 +1,0 @@
-main:
-  - title: "پست‌ها"
-    url: /posts/
-  - title: "دسته‌بندی‌ها"
-    url: /categories/
-  - title: "تگ‌ها"
-    url: /tags/
-  - title: "درباره"
-    url: /about/

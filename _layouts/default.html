@@ -1,85 +1,94 @@
-﻿---
+---
+layout: compress
 ---
 
 <!doctype html>
 
-<html lang="{{ site.locale | slice: 0,2 | default: " fa" }}" class="no-js" dir="{{ site.dir }}">
+{% include origin-type.html %}
 
-<head>
-    {% include head.html %}
-    {% include head/custom.html %}
-    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.png">
-    <link rel="stylesheet" href="/assets/css/custom-theme.css">
-    <meta name="theme-color" content="#aa00ff" />
-    <style>
-        .archive,
-        .page {
-            padding-right: 10px !important;
-            padding-inline-end: 10px !important;
-        }
+{% include lang.html %}
 
-        .archive {
-            padding-inline-end: 10px !important;
-        }
+{% if site.theme_mode %}
+  {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}
+{% endif %}
 
-        .page {
-            padding-inline-end: 10px !important;
-        }
+{% assign _lang_code = lang | split: '-' | first %}
 
-        .highlight {
-            direction: ltr;
-        }
+{%- capture dir -%}
+  {%- if 'ar,fa,he,iw,ps,ug,ur,yi,ku' contains _lang_code -%}
+    dir="rtl"
+  {%- endif -%}
+{%- endcapture -%}
 
-        .list__item .archive__item a {
-            text-decoration: none !important;
-        }
+<!-- `lang` attribute is set in _includes/lang.html -->
+<html lang="{{ lang }}" {{ dir }} {{ prefer_mode }}>
+  {% include head.html %}
 
-        .e-content p img,
-        .e-content img {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 70%;
-        }
+  <body>
+    {% include sidebar.html lang=lang %}
 
-        .page__content p img {
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            width: 70%;
-            border-radius: 1%;
-        }
+    <div id="main-wrapper" class="d-flex justify-content-center">
+      <div class="container d-flex flex-column px-xxl-5">
+        {% include topbar.html lang=lang %}
 
-        .page__share, .archive__subtitle {
-            display: none;
-        }
-    </style>
-</head>
+        <div class="row flex-grow-1">
+          <main aria-label="Main Content" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {% if layout.refactor or layout.layout == 'default' %}
+              {% include refactor-content.html content=content lang=lang %}
+            {% else %}
+              {{ content }}
+            {% endif %}
+          </main>
 
-<body
-    class="layout--{{ page.layout | default: layout.layout }}{% if page.classes or layout.classes %}{{ page.classes | default: layout.classes | join: ' ' | prepend: ' ' }}{% endif %}">
-    {% include_cached skip-links.html %}
-    {% include_cached masthead.html %}
+          <!-- panel -->
+          <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+            <div class="access">
+              {% include_cached update-list.html lang=lang %}
+              {% include_cached trending-tags.html lang=lang %}
+            </div>
 
-    <div class="initial-content">
-        {{ content }}
+            {% for _include in layout.panel_includes %}
+              {% assign _include_path = _include | append: '.html' %}
+              {% include {{ _include_path }} lang=lang %}
+            {% endfor %}
+          </aside>
+        </div>
+
+        <div class="row">
+          <!-- tail -->
+          <div id="tail-wrapper" class="col-12 col-lg-11 col-xl-9 px-md-4">
+            {% for _include in layout.tail_includes %}
+              {% assign _include_path = _include | append: '.html' %}
+              {% include {{ _include_path }} lang=lang %}
+            {% endfor %}
+
+            {% include_cached footer.html lang=lang %}
+          </div>
+        </div>
+
+        {% include_cached search-results.html lang=lang %}
+      </div>
+
+      <aside aria-label="Scroll to Top">
+        <button id="back-to-top" type="button" class="btn btn-lg btn-box-shadow">
+          <i class="fas fa-angle-up"></i>
+        </button>
+      </aside>
     </div>
 
-    {% if site.search == true %}
-    <div class="search-content">
-        {% include_cached search/search_form.html %}
-    </div>
+    <div id="mask" class="d-none position-fixed w-100 h-100 z-1"></div>
+
+    {% if site.pwa.enabled %}
+      {% include_cached notification.html lang=lang %}
     {% endif %}
 
-    <div id="footer" class="page__footer">
-        <footer>
-            {% include footer/custom.html %}
-            {% include_cached footer.html %}
-        </footer>
-    </div>
+    <!-- Embedded scripts -->
 
-    {% include scripts.html %}
+    {% for _include in layout.script_includes %}
+      {% assign _include_path = _include | append: '.html' %}
+      {% include {{ _include_path }} %}
+    {% endfor %}
 
-</body>
-
+    {% include_cached search-loader.html lang=lang %}
+  </body>
 </html>
