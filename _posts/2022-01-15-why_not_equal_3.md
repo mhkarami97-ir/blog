@@ -39,7 +39,7 @@ Console.WriteLine(same); // False
 
 [info](https://workitthrough.wordpress.com/2020/04/14/0-1-0-2-is-not-0-3/)  
 
-[ieeefloat](http://steve.hollasch.net/cgindex/coding/ieeefloat.html)  
+[ieeefloat](https://steve.hollasch.net/cgindex/coding/ieeefloat.html)  
 
 [0.30000000000000004](https://0.30000000000000004.com/)  
 
