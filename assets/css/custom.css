@@ -27,3 +27,11 @@
   margin-right: auto;
   margin-left: auto;
 }
+
+div[class^=language-] {
+  direction: ltr;
+}
+
+div[class^='language-'] .code-header span {
+  margin-left: 0 !important;
+}
