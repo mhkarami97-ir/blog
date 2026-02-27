@@ -110,3 +110,13 @@ div[class^='language-'] .code-header span {
   max-width: 50%;
   margin: 0 auto;
 }
+
+.content h2,
+.content h3,
+.content h4,
+.content h5,
+.content h6 {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
