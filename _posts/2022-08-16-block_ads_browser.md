@@ -18,6 +18,8 @@ tags:
 
 همچنین لیست‌های زیر را از بخش `Setting -> Filter Lists -> Custom -> Imports` می‌توانید اضافه کنید تا تبلیغات بیشتری مسدود شوند. لیست اول نیز مخصوص ایران آماده شده است و تبلیغات فارسی را مسدود می‌کند. لیست دوم هم یکی از بهترین لیست‌های موجود است.  
 
+> https://raw.githubusercontent.com/MasterKia/PersianBlocker/main/PersianBlocker.txt
+> 
 > https://raw.githubusercontent.com/MasterKia/PersianBlocker/main/PersianBlockerHosts.txt
 
 > https://raw.githubusercontent.com/notracking/hosts-blocklists/master/adblock/adblock.txt
