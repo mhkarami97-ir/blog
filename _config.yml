@@ -100,7 +100,7 @@ baseurl: ""
 # Comment on post
 comments:
   # Global switch for the post-comment system. Keeping it empty means disabled.
-  provider: # [disqus | utterances | giscus]
+  provider: giscus # [disqus | utterances | giscus]
   # The provider options are as follows:
   disqus:
     shortname: # fill with the Disqus shortname
@@ -110,15 +110,15 @@ comments:
     issue_term: # < url | pathname | title | ...>
   # Giscus options
   giscus:
-    repo: # <gh-username>/<repo>
-    repo_id:
-    category:
-    category_id:
-    mapping: # optional, default to 'pathname'
-    strict: # optional, default to '0'
-    input_position: # optional, default to 'bottom'
-    lang: # optional, default to the value of `site.lang`
-    reactions_enabled: # optional, default to the value of `1`
+    repo: mhkarami97-ir/.github # <gh-username>/<repo>
+    repo_id: R_kgDOOc-XUw
+    category: Announcements
+    category_id: DIC_kwDOOc-XU84CpTb7
+    mapping: url # optional, default to 'pathname'
+    strict: 1 # optional, default to '0'
+    input_position: bottom # optional, default to 'bottom'
+    lang: fa # optional, default to the value of `site.lang`
+    reactions_enabled: 1 # optional, default to the value of `1`
 
 # Self-hosted static assets, optional
 assets:
