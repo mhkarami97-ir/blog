@@ -120,3 +120,8 @@ div[class^='language-'] .code-header span {
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
+
+#sidebar .sidebar-bottom>a:not(:last-child) {
+  margin-left: 0.8rem;
+  margin-right: 0;
+}
