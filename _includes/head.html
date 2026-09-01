@@ -3,6 +3,8 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f7f7f7">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1e">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="robots" content="max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ '/feed.xml' | absolute_url }}">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta
     name="viewport"
@@ -49,6 +51,130 @@
 
   {{ seo_tags }}
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": "https://mhkarami97.ir/#person",
+  "name": "Mohammad Hossein Karami",
+  "alternateName": ["mhkarami97", "محمد حسین کرمی"],
+  "givenName": "Mohammad Hossein",
+  "familyName": "Karami",
+  "url": "https://mhkarami97.ir",
+  "image": "https://mhkarami97.ir/favicon.png",
+  "description": "Full-stack .NET Developer | Senior Software Engineer | Tour Guide",
+  "email": "mailto:mhkarami97@gmail.com",
+  "nationality": {
+    "@type": "Country",
+    "name": "Iran"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Tehran",
+    "addressRegion": "Tehran",
+    "addressCountry": "IR"
+  },
+  "jobTitle": "Senior Software Engineer",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Asa Co",
+    "url": "https://asax.ir"
+  },
+  "hasOccupation": [
+    {
+      "@type": "Occupation",
+      "name": "Senior Software Engineer",
+      "occupationLocation": { "@type": "City", "name": "Tehran" },
+      "startDate": "2026"
+    },
+    {
+      "@type": "Occupation",
+      "name": "Team Lead",
+      "startDate": "2025",
+      "endDate": "2026"
+    },
+    {
+      "@type": "Occupation",
+      "name": "Backend Developer",
+      "startDate": "2020",
+      "endDate": "2025"
+    }
+  ],
+  "alumniOf": [
+    {
+      "@type": "EducationalOrganization",
+      "name": "Zanjan University",
+      "description": "Bachelor's degree, Computer Engineering"
+    },
+    {
+      "@type": "EducationalOrganization",
+      "name": "Iranian University",
+      "description": "Master's degree, Software Engineering"
+    }
+  ],
+  "knowsAbout": [
+    ".NET / C#",
+    "SQL Server",
+    "Angular",
+    "Vue.js",
+    "Cloudflare Workers",
+    "Software Architecture",
+    "Team Leadership",
+    "Tour Guide"
+  ],
+  "knowsLanguage": [
+    { "@type": "Language", "name": "Persian", "alternateName": "fa" },
+    { "@type": "Language", "name": "English", "alternateName": "en" }
+  ],
+  "hasCredential": {
+    "@type": "EducationalOccupationalCredential",
+    "credentialCategory": "certification",
+    "name": "C# — LinkedIn Skill Assessment Badge",
+    "dateCreated": "2022",
+    "url": "https://www.linkedin.com/in/mhkarami97/details/skills/"
+  },
+  "sameAs": [
+    "https://github.com/mhkarami97",
+    "https://www.linkedin.com/in/mhkarami97",
+    "https://www.instagram.com/mhkarami97",
+    "https://www.threads.net/@mhkarami97",
+    "https://x.com/mhkarami97",
+    "https://www.youtube.com/@mhkarami97",
+    "https://www.aparat.com/mhkarami97",
+    "https://t.me/mhkarami_97",
+    "https://leetcode.com/u/mhkarami97",
+    "https://stackoverflow.com/users/10233323/mhkarami97",
+    "https://medium.com/@mhkarami97",
+    "https://dev.to/mhkarami97",
+    "https://cafebazaar.ir/developer/mhkarami97",
+    "https://blog.mhkarami97.ir",
+    "https://tarfand.mhkarami97.ir",
+    "https://book.mhkarami97.ir",
+    "https://video.mhkarami97.ir",
+    "https://travel.mhkarami97.ir",
+    "https://trip.mhkarami97.ir",
+    "https://poem.mhkarami97.ir",
+    "https://trick.mhkarami97.ir",
+    "https://sentence.mhkarami97.ir",
+    "https://link.mhkarami97.ir",
+    "https://event.mhkarami97.ir",
+    "https://film.mhkarami97.ir",
+    "https://experience.mhkarami97.ir",
+    "https://learn.mhkarami97.ir",
+    "https://dictionary.mhkarami97.ir",
+    "https://algorithm.mhkarami97.ir",
+    "https://list.mhkarami97.ir",
+    "https://prompt.mhkarami97.ir",
+    "https://date.mhkarami97.ir",
+    "https://teach.mhkarami97.ir",
+    "https://economy.mhkarami97.ir",
+    "https://politic.mhkarami97.ir",
+    "https://science.mhkarami97.ir",
+    "https://person.mhkarami97.ir"
+  ]
+}
+</script>
+
   {%- if site.social.fediverse_handle %}
   <!-- Fediverse handle/creator -->
   <meta name="fediverse:creator" content="{{ site.social.fediverse_handle }}">
@@ -93,6 +219,7 @@
   <link rel="stylesheet" href="{{ '/assets/css/:THEME.css' | replace: ':THEME', site.theme | relative_url }}">
 
   {% if dir and dir contains 'rtl' %}
+    <link rel="stylesheet" href="/assets/fonts/Vazirmatn-font-face.css">
     <link rel="stylesheet" href="/assets/css/custom.css">
   {% endif %}
 
