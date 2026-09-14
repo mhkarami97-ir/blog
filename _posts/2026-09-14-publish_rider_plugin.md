@@ -65,7 +65,46 @@ gradle wrapper --gradle-version 8.10
 
 فرآیند بررسی هم شامل چند مرحله است: بررسی خودکار در زمان آپلود، تست سازگاری با Plugin Verifier، تست‌های خودکار و در نهایت بازبینی دستی توسط تیم Marketplace. طبق اعلام رسمی، معمولاً پاسخ ظرف دو روز کاری به ایمیل حساب Marketplace شما ارسال می‌شود.
 
-اگر پروژه شما از قابلیت Plugin Signing استفاده می‌کند، به‌جای `buildPlugin` باید از تسک `signPlugin` استفاده کنید تا خروجی به‌درستی امضا شود.
+اگر پروژه شما از قابلیت Plugin Signing استفاده می‌کند، به‌جای `buildPlugin` باید از تسک `signPlugin` استفاده کنید تا خروجی به‌درستی امضا شود.  
+
+## استفاده از Pipeline
+با توجه به اینکه برای استفاده لوکال نیاز است حداقل 4 گیگ فایل دانلود شود برای حل این مورد می‌توانید از پایپ لاین گیتهاب استفاده کنید تا در چند دقیقه فایل Zip نهایی ساخته شود.  
+کافی است در پایپ لاین این کد را قرار دهید:  
+
+```yml
+# Builds the plugin and uploads the resulting zip as an artifact.
+# Run manually from the "Actions" tab in GitHub.
+
+name: Build Plugin
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: .\gradlew.bat buildPlugin
+
+      - name: Upload plugin zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-distribution
+          path: build/distributions/*.zip
+          retention-days: 7
+```
+
+نمونه پروژه و پایپ لاین در لینک زیر موجود است.  
+
 
 ### جمع‌بندی
 نمونه سورس افزونه:  
