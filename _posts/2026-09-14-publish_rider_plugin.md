@@ -82,25 +82,37 @@ on:
 
 jobs:
   build:
+    name: Build Rider Plugin
     runs-on: windows-latest
+
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout source
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: "17"
 
-      - name: Build with Gradle
-        run: .\gradlew.bat buildPlugin
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-disabled: false
 
-      - name: Upload plugin zip
+      - name: Build plugin
+        run: .\gradlew.bat buildPlugin --build-cache --no-daemon
+
+      - name: Upload plugin ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: plugin-distribution
+          name: rider-demystified-links
           path: build/distributions/*.zip
-          retention-days: 7
+          if-no-files-found: error
+          retention-days: 30
 ```
 
 نمونه پروژه و پایپ لاین در لینک زیر موجود است.  
