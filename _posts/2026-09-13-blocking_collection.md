@@ -1,5 +1,5 @@
 ---
-title: "چه زمانی از BlockingCollection و چه زمانی از ConcurrentQueue استفاده کنیم؟"
+title: "چه زمانی از BlockingCollection و چه زمانی از Channel استفاده کنیم؟"
 categories:
   - Net
 tags:
