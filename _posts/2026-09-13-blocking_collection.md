@@ -222,8 +222,6 @@ var index = BlockingCollection<int>.TakeFromAny(collections, out var value);
 
 ## بخش ۹: مقایسه با گزینه‌های جایگزین
 
-این بخش حتماً باید در انتهای مقاله بیاید تا خواننده گمراه نشود که `BlockingCollection` تنها راه‌حل است:
-
 | ویژگی | BlockingCollection\<T> | Channel\<T> (System.Threading.Channels) | ConcurrentQueue\<T> |
 |---|---|---|---|
 | مدل همزمانی | Thread-based (بلاک‌کننده Thread واقعی) | Task-based Async (بدون بلاک Thread) | بدون بلاک، نیاز به Polling دستی |
@@ -294,8 +292,6 @@ var telemetryChannel = Channel.CreateBounded<SensorReading>(new BoundedChannelOp
     FullMode = BoundedChannelFullMode.DropOldest
 });
 ```
-
-این جدول دقیقاً بر اساس مستندات رسمی مایکروسافت تهیه شده است.
 
 ---
 
