@@ -23,10 +23,12 @@ namespace Asa.RayanDataReceiver
     /// <summary>
     /// یک Decorator بهینه‌شده برای TextWriter که محدودیت‌های کنسول ویندوز در نمایش 
     /// حروف به هم چسبیده و راست‌به‌چپ (RTL) زبان‌های فارسی و عربی را برطرف می‌کند.
+    /// مجهز به سیستم تشخیص هوشمند برای جلوگیری از تداخل با ترمینال‌های مدرن.
     /// </summary>
     public sealed class PersianConsoleWriter : TextWriter
     {
         private readonly TextWriter _originalWriter;
+        private readonly bool _isModernTerminal;
 
         // محدوده کاراکترهای عربی/فارسی در جدول یونیکد برای فیلترینگ بسیار سریع (O(N))
         private const char ArabicBlockStart = '\u0600';
@@ -36,15 +38,47 @@ namespace Asa.RayanDataReceiver
 
         public PersianConsoleWriter(TextWriter originalWriter)
         {
-            SetEncoding();
+            _isModernTerminal = CheckIfModernTerminal();
+            SetEncoding(_isModernTerminal);
             _originalWriter = originalWriter ?? throw new ArgumentNullException(nameof(originalWriter));
         }
 
-        public static void SetEncoding()
+        public static void SetEncoding(bool isModernTerminal = false)
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
-            ConsoleFontHelper.SetConsolasFont();
+
+            // در ترمینال‌های مدرن نیازی به دستکاری فونت ویندوز نیست
+            if (!isModernTerminal)
+            {
+                ConsoleFontHelper.SetConsolasFont();
+            }
+        }
+
+        /// <summary>
+        /// تشخیص خودکار محیط اجرا برای جلوگیری از دوبار معکوس شدن متن در ترمینال‌های هوشمند
+        /// </summary>
+        private static bool CheckIfModernTerminal()
+        {
+            // Windows Terminal
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
+            {
+                return true;
+            }
+
+            // JetBrains Rider / IntelliJ
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TERMINAL_EMULATOR")))
+            {
+                return true;
+            }
+
+            // VS Code
+            if (Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return true;
+            }
+
+            return false;
         }
 
         // 1. رهگیری WriteLine
@@ -56,7 +90,14 @@ namespace Asa.RayanDataReceiver
                 return;
             }
 
-            _originalWriter.WriteLine(ContainsPersian(value) ? PersianTextShaper.Process(value) : value);
+            if (_isModernTerminal || !ContainsPersian(value))
+            {
+                _originalWriter.WriteLine(value);
+            }
+            else
+            {
+                _originalWriter.WriteLine(PersianTextShaper.Process(value));
+            }
         }
 
         // 2. رهگیری Write (نقطه فرار Serilog در اینجا بسته می‌شود)
@@ -68,7 +109,14 @@ namespace Asa.RayanDataReceiver
                 return;
             }
 
-            _originalWriter.Write(ContainsPersian(value) ? PersianTextShaper.Process(value) : value);
+            if (_isModernTerminal || !ContainsPersian(value))
+            {
+                _originalWriter.Write(value);
+            }
+            else
+            {
+                _originalWriter.Write(PersianTextShaper.Process(value));
+            }
         }
 
         // 3. رهگیری آرایه‌های کاراکتری (مسیر دوم فرار لاگرها)
@@ -156,7 +204,6 @@ namespace Asa.RayanDataReceiver
             var inputLength = chars.Length;
 
             // تخصیص یک‌باره حافظه (Pre-allocation) به جای استفاده از عملگر += 
-            // سایز دو برابر در نظر گرفته شده تا فضای کافی برای کاراکترهای ترکیبی (مثل 'لا') وجود داشته باشد.
             var buffer = new char[inputLength * 2];
             var bufferIndex = buffer.Length - 1;
 
@@ -379,9 +426,6 @@ namespace Asa.RayanDataReceiver
                 {
                     // ۲. فقط نام فونت را تغییر می‌دهیم
                     info.FaceName = "Consolas";
-
-                    // اگر می‌خواهید سایز فونت هم حتماً تغییر کند، خط زیر را از کامنت خارج کنید:
-                    // info.dwFontSize = new COORD { X = 0, Y = 18 }; 
 
                     // ۳. تنظیمات جدید را اعمال می‌کنیم
                     SetCurrentConsoleFontEx(hnd, false, ref info);
