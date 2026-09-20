@@ -43,7 +43,7 @@ namespace Asa.RayanDataReceiver
             _originalWriter = originalWriter ?? throw new ArgumentNullException(nameof(originalWriter));
         }
 
-        public static void SetEncoding(bool isModernTerminal = false)
+        private static void SetEncoding(bool isModernTerminal = false)
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
@@ -444,7 +444,8 @@ namespace Asa.RayanDataReceiver
 سپس در بخش شروع برنامه خود این خط را قرار دهید:  
 
 ```csharp
-PersianConsoleWriter.SetEncoding();
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
 Console.SetOut(new PersianConsoleWriter(Console.Out));
 Console.SetError(new PersianConsoleWriter(Console.Error));
 ```
