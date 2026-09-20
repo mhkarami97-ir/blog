@@ -18,7 +18,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ConsoleHelperMhk
+namespace Asa.RayanDataReceiver
 {
     /// <summary>
     /// یک Decorator بهینه‌شده برای TextWriter که محدودیت‌های کنسول ویندوز در نمایش 
@@ -47,6 +47,7 @@ namespace ConsoleHelperMhk
             ConsoleFontHelper.SetConsolasFont();
         }
 
+        // 1. رهگیری WriteLine
         public override void WriteLine(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -55,17 +56,36 @@ namespace ConsoleHelperMhk
                 return;
             }
 
-            // فیلتر اولیه: تنها در صورتی که متن حاوی حروف فارسی باشد، وارد پردازش سنگین می‌شویم.
-            // این کار باعث می‌شود لاگ‌های انگلیسی بدون افت Performance چاپ شوند.
-            if (ContainsPersian(value))
+            _originalWriter.WriteLine(ContainsPersian(value) ? PersianTextShaper.Process(value) : value);
+        }
+
+        // 2. رهگیری Write (نقطه فرار Serilog در اینجا بسته می‌شود)
+        public override void Write(string value)
+        {
+            if (string.IsNullOrEmpty(value))
             {
-                var shapedText = PersianTextShaper.Process(value);
-                _originalWriter.WriteLine(shapedText);
+                _originalWriter.Write(value);
+                return;
             }
-            else
+
+            _originalWriter.Write(ContainsPersian(value) ? PersianTextShaper.Process(value) : value);
+        }
+
+        // 3. رهگیری آرایه‌های کاراکتری (مسیر دوم فرار لاگرها)
+        public override void Write(char[] buffer, int index, int count)
+        {
+            var text = new string(buffer, index, count);
+            Write(text);
+        }
+
+        public override void Write(char[] buffer)
+        {
+            if (buffer == null)
             {
-                _originalWriter.WriteLine(value);
+                return;
             }
+
+            Write(new string(buffer));
         }
 
         public override void Write(char value)
@@ -104,7 +124,7 @@ namespace ConsoleHelperMhk
         private const string RightConnectingChars = "یٹہےڈڑگکڤژچپـئؤرلالآىآةوزظشسيبللأاأتنمكطضصثقفغعهخحجدذلإإۇۆۈ";
         private const string Symbols = @"ـ.،؟ @#$%^&*-+|\/=~,:";
         private const string Brackets = "(){}[]";
-        private const string BaseArabicChars = "آأإابتثجحخدذرزسشصضطظعغفقكلمنهويَّةؤئىپچژڤگٹہےیڈڑۇۆۈک";
+        private const string BaseArabicChars = "آأإابتثجحخدذرزسشصضطظعغفقكلمنهويةؤئىپچژڤگٹہےیڈڑۇۆۈک";
         private const string NonEnglishTerminators = BaseArabicChars + "ء،؟";
 
         // جدول نگاشت (Mapping Table) برای ۴ حالت ممکن هر حرف (تنها، آخر، اول، وسط)
