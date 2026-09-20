@@ -15,15 +15,16 @@ tags:
 ```csharp
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ConsoleAppMhk
+namespace ConsoleHelperMhk
 {
     /// <summary>
     /// یک Decorator بهینه‌شده برای TextWriter که محدودیت‌های کنسول ویندوز در نمایش 
     /// حروف به هم چسبیده و راست‌به‌چپ (RTL) زبان‌های فارسی و عربی را برطرف می‌کند.
     /// </summary>
-    public sealed class CrossPlatformPersianConsoleWriter : TextWriter
+    public sealed class PersianConsoleWriter : TextWriter
     {
         private readonly TextWriter _originalWriter;
 
@@ -33,9 +34,17 @@ namespace ConsoleAppMhk
 
         public override Encoding Encoding => Encoding.UTF8;
 
-        public CrossPlatformPersianConsoleWriter(TextWriter originalWriter)
+        public PersianConsoleWriter(TextWriter originalWriter)
         {
+            SetEncoding();
             _originalWriter = originalWriter ?? throw new ArgumentNullException(nameof(originalWriter));
+        }
+
+        public static void SetEncoding()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+            Console.InputEncoding = Encoding.UTF8;
+            ConsoleFontHelper.SetConsolasFont();
         }
 
         public override void WriteLine(string value)
@@ -288,14 +297,92 @@ namespace ConsoleAppMhk
             return character;
         }
     }
-}
 
+    /// <summary>
+    /// ابزاری برای تعامل با APIهای سطح پایین ویندوز جهت تغییر فونت کنسول.
+    /// به صورت امن پیاده‌سازی شده تا در صورت عدم دسترسی، باعث توقف برنامه نشود.
+    /// </summary>
+    public static class ConsoleFontHelper
+    {
+        private const int STD_OUTPUT_HANDLE = -11;
+        private const int LF_FACESIZE = 32;
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        private struct CONSOLE_FONT_INFO_EX
+        {
+            public uint cbSize;
+            public uint nFont;
+            public COORD dwFontSize;
+            public int FontFamily;
+            public int FontWeight;
+
+            // استفاده از MarshalAs به جای fixed char برای جلوگیری از نیاز به کامپایل unsafe
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LF_FACESIZE)]
+            public string FaceName;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct COORD
+        {
+            public short X;
+            public short Y;
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr GetStdHandle(int nStdHandle);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool GetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern bool SetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
+
+        /// <summary>
+        /// فونت کنسول را به Consolas تغییر می‌دهد. 
+        /// سایز فعلی فونت کاربر را حفظ می‌کند.
+        /// </summary>
+        public static void SetConsolasFont()
+        {
+            try
+            {
+                var hnd = GetStdHandle(STD_OUTPUT_HANDLE);
+                if (hnd == IntPtr.Zero || hnd == new IntPtr(-1))
+                {
+                    return;
+                }
+
+                var info = new CONSOLE_FONT_INFO_EX();
+                info.cbSize = (uint)Marshal.SizeOf(info);
+
+                // ۱. ابتدا تنظیمات فعلی را می‌خوانیم تا سایز فونت کاربر به هم نریزد
+                if (GetCurrentConsoleFontEx(hnd, false, ref info))
+                {
+                    // ۲. فقط نام فونت را تغییر می‌دهیم
+                    info.FaceName = "Consolas";
+
+                    // اگر می‌خواهید سایز فونت هم حتماً تغییر کند، خط زیر را از کامنت خارج کنید:
+                    // info.dwFontSize = new COORD { X = 0, Y = 18 }; 
+
+                    // ۳. تنظیمات جدید را اعمال می‌کنیم
+                    SetCurrentConsoleFontEx(hnd, false, ref info);
+                }
+            }
+            catch
+            {
+                // تغییر فونت یک عملیات حیاتی بیزینسی نیست. اگر ویندوز به هر دلیلی (مثل نداشتن پرمیشن)
+                // اجازه این کار را نداد، نباید کل سرویس از کار بیفتد.
+            }
+        }
+    }
+}
 ```
 
 سپس در بخش شروع برنامه خود این خط را قرار دهید:  
 
 ```csharp
-Console.SetOut(new CrossPlatformPersianConsoleWriter(Console.Out));
+PersianConsoleWriter.SetEncoding();
+Console.SetOut(new PersianConsoleWriter(Console.Out));
+Console.SetError(new PersianConsoleWriter(Console.Error));
 ```
 
 اکنون بصورت خودکار جملات فارسی درست نشان داده می‌شوند.  
