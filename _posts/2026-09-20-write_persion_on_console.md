@@ -14,429 +14,291 @@ tags:
 
 ```csharp
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Asa.RayanDataReceiver
 {
+    internal readonly struct GlyphForms
+    {
+        public readonly char Isolated;
+        public readonly char Initial;
+        public readonly char Medial;
+        public readonly char Final;
+
+        public GlyphForms(char isolated, char initial, char medial, char final)
+        {
+            Isolated = isolated;
+            Initial = initial;
+            Medial = medial;
+            Final = final;
+        }
+    }
+
     /// <summary>
-    /// یک Decorator بهینه‌شده برای TextWriter که محدودیت‌های کنسول ویندوز در نمایش 
-    /// حروف به هم چسبیده و راست‌به‌چپ (RTL) زبان‌های فارسی و عربی را برطرف می‌کند.
-    /// مجهز به سیستم تشخیص هوشمند برای جلوگیری از تداخل با ترمینال‌های مدرن.
+    /// موتور Shaping متن فارسی: تشخیص Runهای متوالی حروف فارسی در یک رشته (حتی چندخطی و
+    /// مخلوط با لاتین/اعداد - مثل خطوط لاگ یا Stack Trace)، تبدیل هر حرف به شکل صحیح آن
+    /// (Isolated/Initial/Medial/Final طبق Joining Type استاندارد یونیکد) و بازچینی
+    /// راست‌به‌چپ فقط برای همان Run، بدون دست‌زدن به بخش‌های لاتین/عددی مجاور.
+    /// این متد Idempotent است: صدا زدنش روی متنی که قبلاً Shape شده، تغییری ایجاد نمی‌کند
+    /// (چون کاراکترهای حالت نهایی/میانی در جدول پایه نیستند)، پس اعمال دوباره‌اش بی‌خطر است.
+    /// </summary>
+    public static class PersianText
+    {
+        private static readonly Dictionary<char, GlyphForms> ShapeTable = new Dictionary<char, GlyphForms>
+        {
+            { '\u0627', new GlyphForms('\uFE8D', '\0', '\0', '\uFE8E') },
+            { '\u0628', new GlyphForms('\uFE8F', '\uFE91', '\uFE92', '\uFE90') },
+            { '\u067E', new GlyphForms('\uFB56', '\uFB58', '\uFB59', '\uFB57') },
+            { '\u062A', new GlyphForms('\uFE95', '\uFE97', '\uFE98', '\uFE96') },
+            { '\u062B', new GlyphForms('\uFE99', '\uFE9B', '\uFE9C', '\uFE9A') },
+            { '\u062C', new GlyphForms('\uFE9D', '\uFE9F', '\uFEA0', '\uFE9E') },
+            { '\u0686', new GlyphForms('\uFB7A', '\uFB7C', '\uFB7D', '\uFB7B') },
+            { '\u062D', new GlyphForms('\uFEA1', '\uFEA3', '\uFEA4', '\uFEA2') },
+            { '\u062E', new GlyphForms('\uFEA5', '\uFEA7', '\uFEA8', '\uFEA6') },
+            { '\u062F', new GlyphForms('\uFEA9', '\0', '\0', '\uFEAA') },
+            { '\u0630', new GlyphForms('\uFEAB', '\0', '\0', '\uFEAC') },
+            { '\u0631', new GlyphForms('\uFEAD', '\0', '\0', '\uFEAE') },
+            { '\u0632', new GlyphForms('\uFEAF', '\0', '\0', '\uFEB0') },
+            { '\u0698', new GlyphForms('\uFB8A', '\0', '\0', '\uFB8B') },
+            { '\u0633', new GlyphForms('\uFEB1', '\uFEB3', '\uFEB4', '\uFEB2') },
+            { '\u0634', new GlyphForms('\uFEB5', '\uFEB7', '\uFEB8', '\uFEB6') },
+            { '\u0635', new GlyphForms('\uFEB9', '\uFEBB', '\uFEBC', '\uFEBA') },
+            { '\u0636', new GlyphForms('\uFEBD', '\uFEBF', '\uFEC0', '\uFEBE') },
+            { '\u0637', new GlyphForms('\uFEC1', '\uFEC3', '\uFEC4', '\uFEC2') },
+            { '\u0638', new GlyphForms('\uFEC5', '\uFEC7', '\uFEC8', '\uFEC6') },
+            { '\u0639', new GlyphForms('\uFEC9', '\uFECB', '\uFECC', '\uFECA') },
+            { '\u063A', new GlyphForms('\uFECD', '\uFECF', '\uFED0', '\uFECE') },
+            { '\u0641', new GlyphForms('\uFED1', '\uFED3', '\uFED4', '\uFED2') },
+            { '\u0642', new GlyphForms('\uFED5', '\uFED7', '\uFED8', '\uFED6') },
+            { '\u06A9', new GlyphForms('\uFB8E', '\uFB90', '\uFB91', '\uFB8F') },
+            { '\u06AF', new GlyphForms('\uFB92', '\uFB94', '\uFB95', '\uFB93') },
+            { '\u0644', new GlyphForms('\uFEDD', '\uFEDF', '\uFEE0', '\uFEDE') },
+            { '\u0645', new GlyphForms('\uFEE1', '\uFEE3', '\uFEE4', '\uFEE2') },
+            { '\u0646', new GlyphForms('\uFEE5', '\uFEE7', '\uFEE8', '\uFEE6') },
+            { '\u0648', new GlyphForms('\uFEED', '\0', '\0', '\uFEEE') },
+            { '\u0647', new GlyphForms('\uFEE9', '\uFEEB', '\uFEEC', '\uFEEA') },
+            { '\u06CC', new GlyphForms('\uFBFC', '\uFBFE', '\uFBFF', '\uFBFD') },
+            { '\u0629', new GlyphForms('\uFE93', '\0', '\0', '\uFE94') },
+            { '\u0622', new GlyphForms('\uFE81', '\0', '\0', '\uFE82') },
+            { '\u0623', new GlyphForms('\uFE83', '\0', '\0', '\uFE84') },
+            { '\u0624', new GlyphForms('\uFE85', '\0', '\0', '\uFE86') },
+            { '\u0625', new GlyphForms('\uFE87', '\0', '\0', '\uFE88') },
+            { '\u0626', new GlyphForms('\uFE89', '\uFE8B', '\uFE8C', '\uFE8A') },
+            { '\u0621', new GlyphForms('\uFE80', '\0', '\0', '\0') },
+        };
+
+        private static readonly HashSet<char> DualJoining = new HashSet<char>
+        {
+            '\u0626', '\u0628', '\u062A', '\u062B', '\u062C', '\u062D', '\u062E', '\u0633',
+            '\u0634', '\u0635', '\u0636', '\u0637', '\u0638', '\u0639', '\u063A', '\u0641',
+            '\u0642', '\u0644', '\u0645', '\u0646', '\u0647', '\u067E', '\u0686', '\u06A9',
+            '\u06AF', '\u06CC'
+        };
+
+        private static readonly HashSet<char> RightJoining = new HashSet<char>
+        {
+            '\u0622', '\u0623', '\u0624', '\u0625', '\u0627', '\u0629', '\u062F', '\u0630',
+            '\u0631', '\u0632', '\u0648', '\u0698'
+        };
+
+        private static readonly HashSet<char> NonJoining = new HashSet<char> { '\u0621' };
+
+        private static bool _initialized;
+        private static bool _terminalSupportsShaping;
+
+        /// <summary>
+        /// باید فقط یک‌بار، در همان اولین خط Main، قبل از هر Console.Write یا ساخت
+        /// LoggerConfiguration فراخوانی شود. Encoding کنسول را UTF-8 می‌کند، ترمینال میزبان
+        /// را تشخیص می‌دهد، و Console.Out/Console.Error را با نسخه‌ی Shaping-Aware عوض می‌کند.
+        /// </summary>
+        public static void Initialize()
+        {
+            if (_initialized)
+            {
+                return;
+            }
+
+            // مرحله ۱: تنظیم Encoding - این کار Console.Out را داخلاً بازسازی می‌کند،
+            // پس باید قبل از گرفتن رفرنس از Console.Out انجام شود.
+            try
+            {
+                Console.OutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+                Console.InputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            }
+            catch (IOException) { /* خروجی Redirect شده به فایل/پایپ؛ بی‌خطر */ }
+            catch (PlatformNotSupportedException) { /* محیط محدود؛ بی‌خطر */ }
+
+            _terminalSupportsShaping = DetectShapingCapableTerminal();
+
+            // مرحله ۲: حالا که Console.Out نسخه‌ی نهایی (با Encoding درست) است، آن را می‌پیچیم.
+            Console.SetOut(new PersianConsoleWriter(Console.Out));
+            Console.SetError(new PersianConsoleWriter(Console.Error));
+
+            _initialized = true;
+        }
+
+        /// <summary>
+        /// متن ورودی را برای نمایش صحیح در کنسول اصلاح می‌کند. اگر ترمینال میزبان خودش
+        /// Shaping/BiDi دارد (Windows Terminal, VS Code Terminal, اکثر ترمینال‌های
+        /// لینوکس/مک)، متن دست‌نخورده برمی‌گردد.
+        /// </summary>
+        public static string Shape(string text)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (string.IsNullOrEmpty(text) || _terminalSupportsShaping)
+            {
+                return text;
+            }
+
+            var sb = new StringBuilder(text.Length);
+            var i = 0;
+            while (i < text.Length)
+            {
+                if (IsPersianLetter(text[i]))
+                {
+                    var start = i;
+                    var end = i;
+                    var lastLetterEnd = i;
+                    while (end < text.Length && (IsPersianLetter(text[end]) || text[end] == ' '))
+                    {
+                        if (IsPersianLetter(text[end]))
+                        {
+                            lastLetterEnd = end + 1;
+                        }
+
+                        end++;
+                    }
+                    end = lastLetterEnd; // فاصله‌های انتهایی که به کلمه‌ی فارسی بعدی متصل نیستند حذف می‌شوند
+                    sb.Append(ShapeAndReverseRun(text.Substring(start, end - start)));
+                    i = end;
+                }
+                else
+                {
+                    sb.Append(text[i]);
+                    i++;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private static bool IsPersianLetter(char c) => ShapeTable.ContainsKey(c);
+
+        private static string ShapeAndReverseRun(string run)
+        {
+            var shaped = new char[run.Length];
+
+            for (var k = 0; k < run.Length; k++)
+            {
+                var ch = run[k];
+
+                if (!ShapeTable.TryGetValue(ch, out var forms))
+                {
+                    shaped[k] = ch; // فاصله‌ی داخلی بین دو کلمه‌ی فارسی
+                    continue;
+                }
+
+                if (NonJoining.Contains(ch))
+                {
+                    shaped[k] = forms.Isolated;
+                    continue;
+                }
+
+                var prevChar = k > 0 ? run[k - 1] : '\0';
+                var nextChar = k < run.Length - 1 ? run[k + 1] : '\0';
+
+                var joinsPrev = prevChar != '\0'
+                                 && DualJoining.Contains(prevChar)
+                                 && (DualJoining.Contains(ch) || RightJoining.Contains(ch));
+
+                var joinsNext = DualJoining.Contains(ch)
+                                 && nextChar != '\0'
+                                 && (DualJoining.Contains(nextChar) || RightJoining.Contains(nextChar));
+
+                char result;
+                if (joinsPrev && joinsNext)
+                {
+                    result = forms.Medial != '\0' ? forms.Medial : forms.Final;
+                }
+                else if (joinsPrev)
+                {
+                    result = forms.Final;
+                }
+                else if (joinsNext)
+                {
+                    result = forms.Initial != '\0' ? forms.Initial : forms.Isolated;
+                }
+                else
+                {
+                    result = forms.Isolated;
+                }
+
+                shaped[k] = result;
+            }
+
+            Array.Reverse(shaped);
+            return new string(shaped);
+        }
+
+        private static bool DetectShapingCapableTerminal()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return true; // لینوکس/مک: اکثر ترمینال‌های مدرن خودشان Shaping/BiDi دارند
+            }
+
+            var isWindowsTerminal = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION"));
+            var isVsCodeTerminal = Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode";
+            return isWindowsTerminal || isVsCodeTerminal;
+        }
+    }
+
+    /// <summary>
+    /// TextWriter‌ای که یک TextWriter دیگر (مثلاً Console.Out اصلی) را می‌پیچد و قبل از
+    /// نوشتن، متن را از PersianText.Shape رد می‌کند. با override کردن فقط چند متد کلیدی،
+    /// تمام Overloadهای Write/WriteLine (int, bool, object, char[], double, ...) به‌طور
+    /// خودکار پوشش داده می‌شوند؛ چون پیاده‌سازی پایه‌ی TextWriter در .NET، آن Overloadها را
+    /// با صدا زدن Write(string)/WriteLine(string) مجازی (virtual) پیاده‌سازی می‌کند.
+    /// محدودیت شناخته‌شده: اگر کدی حرف‌به‌حرف با Write(char) بنویسد (نه رشته‌ی کامل)،
+    /// Shaping روی هر حرف به‌تنهایی معنا ندارد و بدون تغییر عبور می‌کند - این الگو در
+    /// Console.WriteLine، Console.Write(string)، ex.ToString() و خروجی سریلاگ دیده نمی‌شود.
     /// </summary>
     public sealed class PersianConsoleWriter : TextWriter
     {
-        private readonly TextWriter _originalWriter;
-        private readonly bool _isModernTerminal;
+        private readonly TextWriter _inner;
 
-        // محدوده کاراکترهای عربی/فارسی در جدول یونیکد برای فیلترینگ بسیار سریع (O(N))
-        private const char ArabicBlockStart = '\u0600';
-        private const char ArabicBlockEnd = '\u06FF';
-
-        public override Encoding Encoding => Encoding.UTF8;
-
-        public PersianConsoleWriter(TextWriter originalWriter)
+        public PersianConsoleWriter(TextWriter inner)
         {
-            _isModernTerminal = CheckIfModernTerminal();
-            SetEncoding(_isModernTerminal);
-            _originalWriter = originalWriter ?? throw new ArgumentNullException(nameof(originalWriter));
+            _inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
 
-        private static void SetEncoding(bool isModernTerminal = false)
-        {
-            Console.OutputEncoding = Encoding.UTF8;
-            Console.InputEncoding = Encoding.UTF8;
+        public override Encoding Encoding => _inner.Encoding;
 
-            // در ترمینال‌های مدرن نیازی به دستکاری فونت ویندوز نیست
-            if (!isModernTerminal)
-            {
-                ConsoleFontHelper.SetConsolasFont();
-            }
+        public override string NewLine
+        {
+            get => _inner.NewLine;
+            set => _inner.NewLine = value;
         }
 
-        /// <summary>
-        /// تشخیص خودکار محیط اجرا برای جلوگیری از دوبار معکوس شدن متن در ترمینال‌های هوشمند
-        /// </summary>
-        private static bool CheckIfModernTerminal()
-        {
-            // Windows Terminal
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WT_SESSION")))
-            {
-                return true;
-            }
+        public override void Write(string value) => _inner.Write(PersianText.Shape(value));
 
-            // JetBrains Rider / IntelliJ
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("TERMINAL_EMULATOR")))
-            {
-                return true;
-            }
+        public override void Write(char[] buffer, int index, int count) =>
+            _inner.Write(PersianText.Shape(new string(buffer, index, count)));
 
-            // VS Code
-            if (Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                return true;
-            }
+        public override void WriteLine() => _inner.WriteLine();
 
-            return false;
-        }
+        public override void WriteLine(string value) => _inner.WriteLine(PersianText.Shape(value));
 
-        // 1. رهگیری WriteLine
-        public override void WriteLine(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                _originalWriter.WriteLine(value);
-                return;
-            }
+        public override void Write(char value) => _inner.Write(value);
 
-            if (_isModernTerminal || !ContainsPersian(value))
-            {
-                _originalWriter.WriteLine(value);
-            }
-            else
-            {
-                _originalWriter.WriteLine(PersianTextShaper.Process(value));
-            }
-        }
-
-        // 2. رهگیری Write (نقطه فرار Serilog در اینجا بسته می‌شود)
-        public override void Write(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                _originalWriter.Write(value);
-                return;
-            }
-
-            if (_isModernTerminal || !ContainsPersian(value))
-            {
-                _originalWriter.Write(value);
-            }
-            else
-            {
-                _originalWriter.Write(PersianTextShaper.Process(value));
-            }
-        }
-
-        // 3. رهگیری آرایه‌های کاراکتری (مسیر دوم فرار لاگرها)
-        public override void Write(char[] buffer, int index, int count)
-        {
-            var text = new string(buffer, index, count);
-            Write(text);
-        }
-
-        public override void Write(char[] buffer)
-        {
-            if (buffer == null)
-            {
-                return;
-            }
-
-            Write(new string(buffer));
-        }
-
-        public override void Write(char value)
-        {
-            _originalWriter.Write(value);
-        }
-
-        /// <summary>
-        /// بررسی وجود حروف فارسی با استفاده از حلقه for ساده به جای LINQ 
-        /// جهت جلوگیری از تخصیص حافظه (Zero Allocation) و حفظ حداکثر سرعت.
-        /// </summary>
-        private bool ContainsPersian(string text)
-        {
-            for (var i = 0; i < text.Length; i++)
-            {
-                var character = text[i];
-                if (character >= ArabicBlockStart && character <= ArabicBlockEnd)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// هسته پردازشگر متن (Text Shaper). 
-    /// وظیفه تبدیل کدهای استاندارد یونیکد به کاراکترهای چسبیده (Presentation Forms) 
-    /// و مدیریت جهت متن (Bi-directional) را بر عهده دارد.
-    /// </summary>
-    internal static class PersianTextShaper
-    {
-        private const int LaaGlyphIndex = 400; // 8 * 50 (آفست برای ترکیبات حرف 'لا')
-        private const string LeftConnectingChars = "یٹہےگکڤچپـئظشسيبلتنمكطضصثقفغعهخحج";
-        private const string RightConnectingChars = "یٹہےڈڑگکڤژچپـئؤرلالآىآةوزظشسيبللأاأتنمكطضصثقفغعهخحجدذلإإۇۆۈ";
-        private const string Symbols = @"ـ.،؟ @#$%^&*-+|\/=~,:";
-        private const string Brackets = "(){}[]";
-        private const string BaseArabicChars = "آأإابتثجحخدذرزسشصضطظعغفقكلمنهويةؤئىپچژڤگٹہےیڈڑۇۆۈک";
-        private const string NonEnglishTerminators = BaseArabicChars + "ء،؟";
-
-        // جدول نگاشت (Mapping Table) برای ۴ حالت ممکن هر حرف (تنها، آخر، اول، وسط)
-        private const string PresentationForms =
-            "ﺁ ﺁ ﺂ ﺂ " + "ﺃ ﺃ ﺄ ﺄ " + "ﺇ ﺇ ﺈ ﺈ " + "ﺍ ﺍ ﺎ ﺎ " + "ﺏ ﺑ ﺒ ﺐ " + "ﺕ ﺗ ﺘ ﺖ " +
-            "ﺙ ﺛ ﺜ ﺚ " + "ﺝ ﺟ ﺠ ﺞ " + "ﺡ ﺣ ﺤ ﺢ " + "ﺥ ﺧ ﺨ ﺦ " + "ﺩ ﺩ ﺪ ﺪ " + "ﺫ ﺫ ﺬ ﺬ " +
-            "ﺭ ﺭ ﺮ ﺮ " + "ﺯ ﺯ ﺰ ﺰ " + "ﺱ ﺳ ﺴ ﺲ " + "ﺵ ﺷ ﺸ ﺶ " + "ﺹ ﺻ ﺼ ﺺ " + "ﺽ ﺿ ﻀ ﺾ " +
-            "ﻁ ﻃ ﻄ ﻂ " + "ﻅ ﻇ ﻈ ﻆ " + "ﻉ ﻋ ﻌ ﻊ " + "ﻍ ﻏ ﻐ ﻎ " + "ﻑ ﻓ ﻔ ﻒ " + "ﻕ ﻗ ﻘ ﻖ " +
-            "ﻙ ﻛ ﻜ ﻚ " + "ﻝ ﻟ ﻠ ﻞ " + "ﻡ ﻣ ﻤ ﻢ " + "ﻥ ﻧ ﻨ ﻦ " + "ﻩ ﻫ ﻬ ﻪ " + "ﻭ ﻭ ﻮ ﻮ " +
-            "ﻱ ﻳ ﻴ ﻲ " + "ﺓ ﺓ ﺔ ﺔ " + "ﺅ ﺅ ﺆ ﺆ " + "ﺉ ﺋ ﺌ ﺊ " + "ﻯ ﻯ ﻰ ﻰ " + "ﭖ ﭘ ﭙ ﭗ " +
-            "ﭺ ﭼ ﭽ ﭻ " + "ﮊ ﮊ ﮋ ﮋ " + "ﭪ ﭬ ﭭ ﭫ " + "ﮒ ﮔ ﮕ ﮓ " + "ﭦ ﭨ ﭩ ﭧ " + "ﮦ ﮨ ﮩ ﮧ " +
-            "ﮮ ﮰ ﮱ ﮯ " + "ﯼ ﯾ ﯿ ﯽ " + "ﮈ ﮈ ﮉ ﮉ " + "ﮌ ﮌ ﮍ ﮍ " + "ﯗ ﯗ ﯘ ﯘ " + "ﯙ ﯙ ﯚ ﯚ " +
-            "ﯛ ﯛ ﯜ ﯜ " + "ﮎ ﮐ ﮑ ﮏ " + "ﻵ ﻵ ﻶ ﻶ " + "ﻷ ﻷ ﻸ ﻸ " + "ﻹ ﻹ ﻺ ﻺ " + "ﻻ ﻻ ﻼ ﻼ ";
-
-        // ثابت‌های تعیین موقعیت حرف در کلمه
-        private const int ShapeIsolated = 0;
-        private const int ShapeFinal = 2;
-        private const int ShapeInitial = 4;
-        private const int ShapeMedial = 6;
-
-        public static string Process(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return input;
-            }
-
-            var chars = input.ToCharArray();
-            var inputLength = chars.Length;
-
-            // تخصیص یک‌باره حافظه (Pre-allocation) به جای استفاده از عملگر += 
-            var buffer = new char[inputLength * 2];
-            var bufferIndex = buffer.Length - 1;
-
-            void PushToBuffer(char c)
-            {
-                buffer[bufferIndex--] = c;
-            }
-
-            for (var currentIndex = 0; currentIndex < inputLength; currentIndex++)
-            {
-                var shapePosition = ShapeIsolated;
-                var currentCharacter = chars[currentIndex];
-
-                // فاز ۱: تشخیص موقعیت کاراکتر در کلمه (Contextual Analysis)
-                if (currentIndex == 0)
-                {
-                    shapePosition = RightConnectingChars.IndexOf(chars[0]) >= 0 ? ShapeFinal : ShapeIsolated;
-                }
-                else if (currentIndex == inputLength - 1)
-                {
-                    shapePosition = (inputLength > 1 && LeftConnectingChars.IndexOf(chars[inputLength - 2]) >= 0) ? ShapeMedial : ShapeIsolated;
-                }
-                else
-                {
-                    var isPrevLeftConnecting = LeftConnectingChars.IndexOf(chars[currentIndex - 1]) >= 0;
-                    var isNextRightConnecting = RightConnectingChars.IndexOf(chars[currentIndex + 1]) >= 0;
-
-                    if (!isPrevLeftConnecting)
-                    {
-                        shapePosition = !isNextRightConnecting ? ShapeIsolated : ShapeFinal;
-                    }
-                    else
-                    {
-                        shapePosition = isNextRightConnecting ? ShapeInitial : ShapeMedial;
-                    }
-                }
-
-                // فاز ۲: نگاشت و پردازش کاراکترها
-                if (currentCharacter == 'ء')
-                {
-                    PushToBuffer('ﺀ');
-                }
-                else if (Brackets.IndexOf(currentCharacter) >= 0)
-                {
-                    var bracketMatchIndex = Brackets.IndexOf(currentCharacter);
-                    PushToBuffer(bracketMatchIndex % 2 == 0 ? Brackets[bracketMatchIndex + 1] : Brackets[bracketMatchIndex - 1]);
-                }
-                else if (BaseArabicChars.IndexOf(currentCharacter) >= 0)
-                {
-                    if (currentCharacter == 'ل' && currentIndex + 1 < inputLength)
-                    {
-                        var nextCharBaseIndex = BaseArabicChars.IndexOf(chars[currentIndex + 1]);
-                        if (nextCharBaseIndex >= 0 && nextCharBaseIndex < 4) // مدیریت لیگچر (Ligature) 'لا'
-                        {
-                            PushToBuffer(PresentationForms[nextCharBaseIndex * 8 + shapePosition + LaaGlyphIndex]);
-                            currentIndex++;
-                        }
-                        else
-                        {
-                            PushToBuffer(PresentationForms[BaseArabicChars.IndexOf(currentCharacter) * 8 + shapePosition]);
-                        }
-                    }
-                    else
-                    {
-                        PushToBuffer(PresentationForms[BaseArabicChars.IndexOf(currentCharacter) * 8 + shapePosition]);
-                    }
-                }
-                else if (Symbols.IndexOf(currentCharacter) >= 0)
-                {
-                    PushToBuffer(currentCharacter);
-                }
-                else if (PresentationForms.IndexOf(currentCharacter) >= 0)
-                {
-                    var unicodeIndex = PresentationForms.IndexOf(currentCharacter);
-                    if (unicodeIndex >= LaaGlyphIndex)
-                    {
-                        for (var offset = 8; offset < 40; offset += 8)
-                        {
-                            if (unicodeIndex < offset + LaaGlyphIndex)
-                            {
-                                PushToBuffer(BaseArabicChars[(offset / 8) - 1]);
-                                PushToBuffer('ل');
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        for (var offset = 8; offset < LaaGlyphIndex + 32; offset += 8)
-                        {
-                            if (unicodeIndex < offset)
-                            {
-                                PushToBuffer(BaseArabicChars[(offset / 8) - 1]);
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // فاز ۳: مدیریت کلمات انگلیسی و اعداد درون متن فارسی (Bi-directional Text Handling)
-                    var segmentBuilder = new StringBuilder();
-                    var lookAheadIndex = currentIndex;
-
-                    while (inputLength > lookAheadIndex &&
-                           NonEnglishTerminators.IndexOf(chars[lookAheadIndex]) < 0 &&
-                           PresentationForms.IndexOf(chars[lookAheadIndex]) < 0 &&
-                           Brackets.IndexOf(chars[lookAheadIndex]) < 0)
-                    {
-                        segmentBuilder.Append(NormalizeToPersianNumber(chars[lookAheadIndex]));
-                        lookAheadIndex++;
-                    }
-
-                    var englishSegment = segmentBuilder.ToString();
-                    var segmentEndIndex = englishSegment.Length - 1;
-                    var trailingSpacesCount = 0;
-
-                    // انتقال فاصله‌های انتهای بلوک انگلیسی به پشت بلوک برای رندر صحیح در چیدمان RTL
-                    while (segmentEndIndex >= 0 && englishSegment[segmentEndIndex] == ' ')
-                    {
-                        trailingSpacesCount++;
-                        segmentEndIndex--;
-                    }
-
-                    for (var i = segmentEndIndex; i >= 0; i--)
-                    {
-                        PushToBuffer(englishSegment[i]);
-                    }
-
-                    for (var i = 0; i < trailingSpacesCount; i++)
-                    {
-                        PushToBuffer(' ');
-                    }
-
-                    currentIndex = lookAheadIndex - 1;
-                }
-            }
-
-            var finalStringLength = buffer.Length - bufferIndex - 1;
-            return new string(buffer, bufferIndex + 1, finalStringLength);
-        }
-
-        /// <summary>
-        /// تبدیل ریاضیاتی (O(1)) اعداد انگلیسی یا عربی به اعداد فارسی.
-        /// </summary>
-        private static char NormalizeToPersianNumber(char character)
-        {
-            if (character >= '0' && character <= '9')
-            {
-                return (char)(character - '0' + '۰');
-            }
-
-            if (character >= '٠' && character <= '٩')
-            {
-                return (char)(character - '٠' + '۰');
-            }
-
-            return character;
-        }
-    }
-
-    /// <summary>
-    /// ابزاری برای تعامل با APIهای سطح پایین ویندوز جهت تغییر فونت کنسول.
-    /// به صورت امن پیاده‌سازی شده تا در صورت عدم دسترسی، باعث توقف برنامه نشود.
-    /// </summary>
-    public static class ConsoleFontHelper
-    {
-        private const int STD_OUTPUT_HANDLE = -11;
-        private const int LF_FACESIZE = 32;
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct CONSOLE_FONT_INFO_EX
-        {
-            public uint cbSize;
-            public uint nFont;
-            public COORD dwFontSize;
-            public int FontFamily;
-            public int FontWeight;
-
-            // استفاده از MarshalAs به جای fixed char برای جلوگیری از نیاز به کامپایل unsafe
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LF_FACESIZE)]
-            public string FaceName;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct COORD
-        {
-            public short X;
-            public short Y;
-        }
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr GetStdHandle(int nStdHandle);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool GetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool SetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFO_EX lpConsoleCurrentFontEx);
-
-        /// <summary>
-        /// فونت کنسول را به Consolas تغییر می‌دهد. 
-        /// سایز فعلی فونت کاربر را حفظ می‌کند.
-        /// </summary>
-        public static void SetConsolasFont()
-        {
-            try
-            {
-                var hnd = GetStdHandle(STD_OUTPUT_HANDLE);
-                if (hnd == IntPtr.Zero || hnd == new IntPtr(-1))
-                {
-                    return;
-                }
-
-                var info = new CONSOLE_FONT_INFO_EX();
-                info.cbSize = (uint)Marshal.SizeOf(info);
-
-                // ۱. ابتدا تنظیمات فعلی را می‌خوانیم تا سایز فونت کاربر به هم نریزد
-                if (GetCurrentConsoleFontEx(hnd, false, ref info))
-                {
-                    // ۲. فقط نام فونت را تغییر می‌دهیم
-                    info.FaceName = "Consolas";
-
-                    // ۳. تنظیمات جدید را اعمال می‌کنیم
-                    SetCurrentConsoleFontEx(hnd, false, ref info);
-                }
-            }
-            catch
-            {
-                // تغییر فونت یک عملیات حیاتی بیزینسی نیست. اگر ویندوز به هر دلیلی (مثل نداشتن پرمیشن)
-                // اجازه این کار را نداد، نباید کل سرویس از کار بیفتد.
-            }
-        }
+        public override void Flush() => _inner.Flush();
     }
 }
 ```
@@ -444,10 +306,7 @@ namespace Asa.RayanDataReceiver
 سپس در بخش شروع برنامه خود این خط را قرار دهید:  
 
 ```csharp
-Console.OutputEncoding = Encoding.UTF8;
-Console.InputEncoding = Encoding.UTF8;
-Console.SetOut(new PersianConsoleWriter(Console.Out));
-Console.SetError(new PersianConsoleWriter(Console.Error));
+PersianText.Initialize();
 ```
 
-اکنون بصورت خودکار جملات فارسی درست نشان داده می‌شوند.  
+اکنون بصورت خودکار جملات فارسی درست نشان داده می‌شوند. هرجا که از `Console.WriteLine` یا `Log.Error` یا `throw new Exception` استفاده شده باشد
