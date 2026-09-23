@@ -1,5 +1,5 @@
 ---
-title: " از پورت‌فورواردینگ تا کوییک تانل تحلیل عمیق مکانیزم Cloudflare Tunnel و پروتکل QUIC"
+title: "از پورت‌فورواردینگ تا کوییک تانل تحلیل عمیق مکانیزم Cloudflare Tunnel و پروتکل QUIC"
 categories:
   - Web
 tags:

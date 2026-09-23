@@ -15,7 +15,7 @@ tags:
 
 این مشکل در کتاب **Designing Data-Intensive Applications** (Martin Kleppmann, Chapter 5) به این صورت تعریف شده:
 
-> *"After a user writes data, they should see their own write in subsequent reads — regardless of which replica serves the request."*
+> *"After a user writes data, they should see their own write in subsequent reads - regardless of which replica serves the request."*
 
 وقتی یه سیستم **Leader/Follower Replication** داره، Write به Leader می‌ره ولی Read ممکنه از Followerی بیاد که هنوز sync نشده. نتیجه؟ کاربر داده‌ی خودش رو نمی‌بینه.
 
@@ -33,7 +33,7 @@ tags:
 
 ### ۳. LSN-Based Routing ✅
 
-Leader بعد از هر Write، یه **Log Sequence Number (LSN)** برمی‌گردونه. Read بعدی فقط به Replicaای می‌ره که LSN اون `>= lastWriteLSN` باشه. به جای زمان، از موقعیت واقعی Replication استفاده می‌کنه — دقیق‌ترین روش.
+Leader بعد از هر Write، یه **Log Sequence Number (LSN)** برمی‌گردونه. Read بعدی فقط به Replicaای می‌ره که LSN اون `>= lastWriteLSN` باشه. به جای زمان، از موقعیت واقعی Replication استفاده می‌کنه - دقیق‌ترین روش.
 
 ### ۴. Commit Token (روش Oracle BDB)
 
@@ -159,19 +159,19 @@ public interface IMessageRepository
 ### چند نکته مهم در این پیاده‌سازی
 
 - **TTL روی Redis Key:** بعد از ۱۲۰ ثانیه، فرض می‌کنیم Replication کامل شده و Read دوباره به Follower می‌ره. این مقدار باید بر اساس میانگین Lag واقعی سیستم تنظیم بشه.
-- **Fallback به Leader:** اگر هیچ Replicaای به LSN مورد نیاز نرسیده باشه، به Leader می‌ریم. این یعنی در بدترین حالت، مثل حالت اول عمل می‌کنیم — نه اینکه داده‌ی اشتباه بدیم.
+- **Fallback به Leader:** اگر هیچ Replicaای به LSN مورد نیاز نرسیده باشه، به Leader می‌ریم. این یعنی در بدترین حالت، مثل حالت اول عمل می‌کنیم - نه اینکه داده‌ی اشتباه بدیم.
 - **`MinBy(r => r.Load)`:** بین Replicaهایی که catch-up کردن، اون با کمترین Load رو انتخاب می‌کنیم تا توزیع بار حفظ بشه.
 
 ## مقایسه استراتژی‌ها
 
-| Strategy | دقت | Scalability | پیچیدگی |
-|---|---|---|---|
-| Always Leader | بالا | ضعیف ❌ | کم |
-| Time Window | متوسط | خوب | کم |
-| LSN-Based | بالا | عالی ✅ | متوسط |
-| Sticky Session | متوسط | متوسط | کم |
-| Commit Token | بالا | عالی ✅ | زیاد |
+| Strategy       | دقت   | Scalability | پیچیدگی |
+| -------------- | ----- | ----------- | ------- |
+| Always Leader  | بالا  | ضعیف ❌      | کم      |
+| Time Window    | متوسط | خوب         | کم      |
+| LSN-Based      | بالا  | عالی ✅      | متوسط   |
+| Sticky Session | متوسط | متوسط       | کم      |
+| Commit Token   | بالا  | عالی ✅      | زیاد    |
 
-اگه این مشکل رو داری نادیده می‌گیری، کاربرهات دارن این تجربه رو می‌کنن — و فکر می‌کنن bug هست.
+اگه این مشکل رو داری نادیده می‌گیری، کاربرهات دارن این تجربه رو می‌کنن - و فکر می‌کنن bug هست.
 
 پس اگه سیستمی با تعداد یوزر زیاد و همزمانی زیاد داری، بهتره حواست به این مورد باشه. انتخاب بین این استراتژی‌ها به **میانگین Replication Lag**، **تعداد Replicaها** و **آیا Multi-Device داری یا نه** بستگی داره.
