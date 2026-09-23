@@ -119,6 +119,29 @@ div[class^='language-'] .code-header span {
   justify-content: flex-end;
 }
 
+.content .popup.img-link {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 1.5rem auto;
+  text-align: center;
+}
+
+.content .popup.img-link img {
+  display: block;
+  max-width: 50%;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 6px;
+}
+
+@media (max-width: 576px) {
+  .content .popup.img-link img {
+    max-width: 80%;
+  }
+}
+
 #sidebar .sidebar-bottom>a:not(:last-child) {
   margin-left: 0.8rem;
   margin-right: 0;
