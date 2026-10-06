@@ -1,5 +1,5 @@
 ---
-title: " ساخت جمر بلوتوث و وای‌فای با ESP8266"
+title: "افسانه جمرهای ارزان‌قیمت کالبدشکافی امنیت بلوتوث با ESP8266"
 categories:
   - IOT
 tags:
@@ -7,6 +7,7 @@ tags:
   - esp8266
   - bluetooth
   - jammer
+  - security
 ---
 
 تا به حال برایتان پیش آمده که در یک جلسه مهم، اسپیکر بلوتوثی همسایه یا سیستم صوتی یک مغازه، با پخش آهنگ‌های بلند مزاحم تمرکزتان شود؟ یا در حال تست یک دستگاه اینترنت اشیا هستید و می‌خواهید مقاومت آن را در برابر اختلالات بی‌سیم بسنجید؟ ابزاری که در این مقاله می‌سازیم، دقیقا برای همین کارها طراحی شده است.
@@ -14,6 +15,8 @@ tags:
 این پروژه یک دستگاه محدودکننده (Jammer) در باند فرکانسی ۲.۴ گیگاهرتز است که با یک میکروکنترلر ارزان‌قیمت **ESP8266** و ماژول‌های رادیویی **NRF24L01+** ساخته می‌شود. با این دستگاه می‌توانید ارتباط بین یک اسپیکر بلوتوثی و گوشی را مختل کنید، شبکه وای‌فای را تحت فشار قرار دهید یا بفهمید دستگاه‌های بی‌سیم اطرافتان چقدر در برابر پارازیت مقاوم هستند.
 
 در ادامه، از صفر شروع می‌کنیم. ابتدا می‌فهمیم این دستگاه چطور کار می‌کند، بعد قطعات را تهیه و مدار را می‌بندیم، کد را روی آن آپلود می‌کنیم و در نهایت یاد می‌گیریم چطور عملکردش را بهتر کنیم و ظاهرش را مرتب بسازیم.
+
+> **نتیجه قطعی و صریح:** این روش **به‌طور قطعی کار نمی‌کند** و هیچ انتظاری برای قطع کردن یک اسپیکر بلوتوثی از فاصله چند متری نداشته باشید. این مقاله یک راهنمای ساخت جمر کارآمد نیست؛ یک **کالبدشکافی فنی** است که نشان می‌دهد چرا ویدیوهای اینترنتی درباره «هک بلوتوث با ESP8266» گمراه‌کننده هستند. ما مدار را می‌سازیم، کد را اجرا می‌کنیم و سپس با تحلیل فیزیک امواج و پروتکل بلوتوث ثابت می‌کنیم که چرا این تلاش محکوم به شکست است.
 
 > **توجه:** استفاده از جمر بدون مجوز در بسیاری از کشورها غیرقانونی است. این پروژه صرفا برای اهداف آموزشی، تست‌های کنترل‌شده و آزمایش روی دستگاه‌های متعلق به خودتان طراحی شده است.
 
@@ -87,7 +90,13 @@ ESP8266 وظیفه دارد این ماژول را کنترل کند، بین ک
 
 ### اتصال دکمه
 
-دکمه یک سر به پین **D3 (GPIO0)** و سر دیگر به **GND** وصل می‌شود. این پین در کد با مقاومت pull-up داخلی فعال می‌شود، بنابراین نیازی به مقاومت خارجی نیست.
+اتصال دکمه به تعداد ماژول‌های NRF24L01+ بستگی دارد:
+
+**حالت تک ماژول:** دکمه یک سر به پین **D3 (GPIO0)** و سر دیگر به **GND** وصل می‌شود. این پین با مقاومت pull-up داخلی ESP8266 فعال می‌شود و نیازی به مقاومت خارجی ندارد.
+
+**حالت دو ماژول:** چون پین D3 (GPIO0) برای CSN ماژول دوم اشغال می‌شود، دکمه باید به پین **RX (GPIO3)** منتقل شود. کد به‌صورت خودکار این تغییر را با شرط `#if USE_SECOND_MODULE` مدیریت می‌کند و نیازی به تغییر دستی نیست.
+
+> **نکته مهم:** پین GPIO0 یک پین بوت‌حساس است. اگر هنگام روشن شدن ESP8266 این پین پایین (LOW) نگه داشته شود، دستگاه وارد حالت فلش می‌شود و برنامه اجرا نمی‌شود. به همین دلیل در حالت دو ماژول، دکمه را به RX منتقل کرده‌ایم.
 
 ### خازن: قطعه کوچکی که همه چیز را تغییر می‌دهد
 
@@ -117,7 +126,7 @@ https://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 ### کد کامل با پشتیبانی از چند ماژول NRF24L01
 
-کد زیر از **دو ماژول NRF24L01+** پشتیبانی می‌کند. با این کد، ماژول اول روی کانال‌های زوج و ماژول دوم روی کانال‌های فرد کار می‌کند و پوشش فرکانسی به‌طور قابل‌توجهی افزایش می‌یابد.
+کد زیر از **دو ماژول NRF24L01+** پشتیبانی می‌کند و از معماری **غیرمسدودکننده (Non-Blocking)** استفاده می‌کند. ماژول اول روی کانال جاری و ماژول دوم روی کانال بعدی کار می‌کند تا پوشش فرکانسی افزایش یابد.
 
 ```cpp
 #include <SPI.h>
@@ -135,17 +144,23 @@ https://arduino.esp8266.com/stable/package_esp8266com_index.json
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // ==================== پین‌های ماژول اول ====================
-#define CE_PIN_1   2   // D4
-#define CSN_PIN_1  15  // D8
+#define CE_PIN_1   2   // D4 (GPIO2)
+#define CSN_PIN_1  15  // D8 (GPIO15) - پین پیش‌فرض CS در ESP8266
 
 // ==================== پین‌های ماژول دوم (اختیاری) ====================
-// اگر فقط یک ماژول دارید، این خطوط را کامنت کنید
+// اگر فقط یک ماژول دارید، USE_SECOND_MODULE را 0 کنید
 #define USE_SECOND_MODULE 1
-#define CE_PIN_2   16  // D0
-#define CSN_PIN_2  0   // D3
+#define CE_PIN_2   16  // D0 (GPIO16)
+#define CSN_PIN_2  0   // D3 (GPIO0) - فقط اگر ماژول دوم فعال باشد
 
 // ==================== پین دکمه ====================
-#define BUTTON_PIN 0   // D3
+// دکمه به RX (GPIO3) منتقل شد تا GPIO0 آزاد بماند
+// اگر ماژول دوم غیرفعال است، می‌توانید از D3 استفاده کنید
+#if USE_SECOND_MODULE
+  #define BUTTON_PIN 3   // RX (GPIO3)
+#else
+  #define BUTTON_PIN 0   // D3 (GPIO0)
+#endif
 
 // ==================== تعریف ماژول‌ها ====================
 RF24 radio1(CE_PIN_1, CSN_PIN_1);
@@ -178,61 +193,66 @@ const uint8_t btChannels[] = {
 // ==================== کانال‌های وای‌فای ====================
 const uint8_t wifiChannels[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
-// ==================== متغیرهای زمان‌بندی ====================
+// ==================== متغیرهای زمان‌بندی (غیرمسدودکننده) ====================
 unsigned long lastSwitchTime = 0;
+const unsigned long SWITCH_INTERVAL = 2; // میلی‌ثانیه - حداقل تأخیر ممکن
 int channelIndex = 0;
+
+// ==================== متغیرهای نمایشگر ====================
+unsigned long lastDisplayTime = 0;
+const unsigned long DISPLAY_INTERVAL = 200; // هر ۲۰۰ میلی‌ثانیه OLED را آپدیت کن
+int lastModeIndex = -1;
+
+// ==================== وضعیت ماژول‌ها ====================
+bool module1OK = false;
+bool module2OK = false;
 
 void setup() {
   Serial.begin(115200);
   delay(100);
-  
-  Serial.println("=== 2.4GHz Jammer Started ===");
-  
-  // راه‌اندازی نمایشگر
+
+  Serial.println("=== 2.4GHz RF Tester Started ===");
+  Serial.println("Note: This device is for educational purposes only.");
+
+  // ==================== راه‌اندازی نمایشگر ====================
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println("OLED failed!");
-    while (1);
+  } else {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+    display.println("Initializing...");
+    display.display();
   }
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.println("Initializing...");
-  display.display();
-  
-  // راه‌اندازی دکمه
+
+  // ==================== راه‌اندازی دکمه ====================
   button.setDebounceTime(50);
-  
+
   // ==================== راه‌اندازی ماژول اول ====================
   if (!radio1.begin()) {
     Serial.println("NRF24 #1 not found!");
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.println("NRF24 #1 Error!");
-    display.display();
-    while (1);
+    module1OK = false;
+  } else {
+    module1OK = true;
+    radio1.setAutoAck(false);
+    radio1.stopListening();
+    radio1.setRetries(0, 0);
+    radio1.setPayloadSize(5);
+    radio1.setAddressWidth(3);
+    radio1.setPALevel(RF24_PA_MAX);
+    radio1.setDataRate(RF24_2MBPS);
+    radio1.setCRCLength(RF24_CRC_DISABLED);
+    Serial.println("NRF24 #1 OK");
   }
-  
-  radio1.setAutoAck(false);
-  radio1.stopListening();
-  radio1.setRetries(0, 0);
-  radio1.setPayloadSize(5);
-  radio1.setAddressWidth(3);
-  radio1.setPALevel(RF24_PA_MAX);
-  radio1.setDataRate(RF24_2MBPS);
-  radio1.setCRCLength(RF24_CRC_DISABLED);
-  
-  Serial.println("NRF24 #1 OK");
-  
+
   // ==================== راه‌اندازی ماژول دوم ====================
 #if USE_SECOND_MODULE
   if (!radio2.begin()) {
-    Serial.println("NRF24 #2 not found!");
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.println("NRF24 #2 Error!");
-    display.display();
+    Serial.println("NRF24 #2 not found - continuing with one module");
+    module2OK = false;
   } else {
+    module2OK = true;
     radio2.setAutoAck(false);
     radio2.stopListening();
     radio2.setRetries(0, 0);
@@ -244,15 +264,25 @@ void setup() {
     Serial.println("NRF24 #2 OK");
   }
 #endif
-  
+
+  // ==================== نمایش وضعیت اولیه ====================
+  if (!module1OK) {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.println("NRF24 #1 Error!");
+    display.println("Check wiring.");
+    display.display();
+    while (1) { delay(10); } // فقط در صورت خطای ماژول اول متوقف شو
+  }
+
   updateDisplay();
   Serial.println("Ready. Press button to change mode.");
 }
 
 void loop() {
+  // ==================== خواندن دکمه (غیرمسدودکننده) ====================
   button.loop();
-  
-  // تغییر حالت با دکمه
+
   if (button.isPressed()) {
     modeIndex = (modeIndex + 1) % 3;
     switch (modeIndex) {
@@ -261,65 +291,82 @@ void loop() {
       case 2: currentMode = WIFI_ONLY; break;
     }
     channelIndex = 0;
+    lastModeIndex = modeIndex;
     updateDisplay();
     Serial.print("Mode changed to: ");
     Serial.println(modeIndex);
   }
-  
-  // اجرای حالت فعلی
-  switch (currentMode) {
-    case IDLE:
-      // هیچ کاری نمی‌کنیم
-      break;
-      
-    case FULL_ATTACK:
-      fullAttack();
-      break;
-      
-    case WIFI_ONLY:
-      wifiAttack();
-      break;
+
+  // ==================== اجرای حالت فعلی (غیرمسدودکننده با millis) ====================
+  unsigned long currentMillis = millis();
+
+  // تغییر کانال فقط زمانی که زمان مقرر رسیده باشد
+  if (currentMillis - lastSwitchTime >= SWITCH_INTERVAL) {
+    lastSwitchTime = currentMillis;
+
+    switch (currentMode) {
+      case IDLE:
+        // هیچ کاری نمی‌کنیم
+        break;
+
+      case FULL_ATTACK:
+        fullAttack();
+        break;
+
+      case WIFI_ONLY:
+        wifiAttack();
+        break;
+    }
   }
-  
-  delay(1);
+
+  // ==================== به‌روزرسانی نمایشگر (غیرمسدودکننده) ====================
+  if (currentMillis - lastDisplayTime >= DISPLAY_INTERVAL) {
+    lastDisplayTime = currentMillis;
+    updateDisplay();
+  }
 }
 
 // ==================== حمله کامل (بلوتوث + وای‌فای) ====================
 void fullAttack() {
-  // ماژول اول روی کانال‌های زوج
+  if (!module1OK) return;
+
+  // ماژول اول روی کانال جاری
   radio1.setChannel(btChannels[channelIndex]);
   radio1.startConstCarrier(RF24_PA_MAX, btChannels[channelIndex]);
-  
+
 #if USE_SECOND_MODULE
-  // ماژول دوم روی کانال‌های فرد (اگر کانال بعدی وجود دارد)
-  int nextIndex = (channelIndex + 1) % (sizeof(btChannels) / sizeof(btChannels[0]));
-  radio2.setChannel(btChannels[nextIndex]);
-  radio2.startConstCarrier(RF24_PA_MAX, btChannels[nextIndex]);
+  if (module2OK) {
+    // ماژول دوم روی کانال بعدی
+    int nextIndex = (channelIndex + 1) % (sizeof(btChannels) / sizeof(btChannels[0]));
+    radio2.setChannel(btChannels[nextIndex]);
+    radio2.startConstCarrier(RF24_PA_MAX, btChannels[nextIndex]);
+  }
 #endif
-  
+
   channelIndex++;
   if (channelIndex >= (sizeof(btChannels) / sizeof(btChannels[0]))) {
     channelIndex = 0;
   }
-  
-  delay(5); // مکث کوتاه بین کانال‌ها
 }
 
 // ==================== حمله فقط وای‌فای ====================
 void wifiAttack() {
+  if (!module1OK) return;
+
   int ch = wifiChannels[channelIndex % (sizeof(wifiChannels) / sizeof(wifiChannels[0]))];
-  
+
   radio1.setChannel(ch);
   radio1.startConstCarrier(RF24_PA_MAX, ch);
-  
+
 #if USE_SECOND_MODULE
-  int nextCh = wifiChannels[(channelIndex + 1) % (sizeof(wifiChannels) / sizeof(wifiChannels[0]))];
-  radio2.setChannel(nextCh);
-  radio2.startConstCarrier(RF24_PA_MAX, nextCh);
+  if (module2OK) {
+    int nextCh = wifiChannels[(channelIndex + 1) % (sizeof(wifiChannels) / sizeof(wifiChannels[0]))];
+    radio2.setChannel(nextCh);
+    radio2.startConstCarrier(RF24_PA_MAX, nextCh);
+  }
 #endif
-  
+
   channelIndex++;
-  delay(5);
 }
 
 // ==================== به‌روزرسانی نمایشگر ====================
@@ -327,11 +374,11 @@ void updateDisplay() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  
+
   display.setCursor(0, 0);
-  display.println("2.4GHz Jammer");
+  display.println("2.4GHz RF Tester");
   display.drawLine(0, 10, 128, 10, SSD1306_WHITE);
-  
+
   display.setCursor(0, 20);
   display.print("Mode: ");
   switch (currentMode) {
@@ -345,30 +392,42 @@ void updateDisplay() {
       display.println("WiFi Only");
       break;
   }
-  
+
   display.setCursor(0, 35);
   display.print("Modules: ");
 #if USE_SECOND_MODULE
-  display.println("2x NRF24");
+  if (module1OK && module2OK) {
+    display.println("2x NRF24");
+  } else if (module1OK) {
+    display.println("1x NRF24 (M2 err)");
+  } else {
+    display.println("No module!");
+  }
 #else
   display.println("1x NRF24");
 #endif
-  
+
   display.setCursor(0, 50);
   display.print("Ch: ");
   display.println(channelIndex);
-  
+
   display.display();
 }
 ```
 
 ### توضیح بخش‌های کلیدی کد
 
-**۱. پشتیبانی از دو ماژول:** با تعریف `USE_SECOND_MODULE` می‌توانید به‌سادگی ماژول دوم را فعال یا غیرفعال کنید. ماژول اول روی کانال‌های زوج و ماژول دوم روی کانال‌های فرد کار می‌کند تا پوشش فرکانسی دو برابر شود.
+**۱. دکمه و نمایشگر OLED در تمام لحظات پاسخ‌گو هستند و برنامه هیچ‌گاه مسدود نمی‌شود. متغیر `lastSwitchTime` زمان آخرین تغییر کانال را ذخیره می‌کند و فقط زمانی که `SWITCH_INTERVAL` میلی‌ثانیه گذشته باشد، کانال عوض می‌شود.
 
-**۲. حالت‌های مختلف:** دستگاه سه حالت دارد: **Idle** (انتظار)، **Full Attack** (حمله کامل به بلوتوث و وای‌فای) و **WiFi Only** (فقط وای‌فای). با هر بار فشردن دکمه، حالت تغییر می‌کند.
+**۲. پشتیبانی از دو ماژول:** با تعریف `USE_SECOND_MODULE` می‌توانید ماژول دوم را فعال یا غیرفعال کنید. ماژول اول روی کانال جاری و ماژول دوم روی کانال بعدی کار می‌کند تا پوشش فرکانسی دو برابر شود.
 
-**۳. تنظیمات رادیو:** توان خروجی روی `RF24_PA_MAX` (حداکثر)، سرعت داده روی `RF24_2MBPS` (سریع‌ترین) و CRC غیرفعال تنظیم شده است تا نویز خالص و بدون سربار ارسال شود.
+**۳. مدیریت هوشمند پین دکمه:** کد به‌صورت خودکار پین دکمه را بر اساس تعداد ماژول‌ها انتخاب می‌کند. اگر دو ماژول فعال باشد، دکمه روی RX (GPIO3) و اگر یک ماژول باشد، روی D3 (GPIO0) قرار می‌گیرد. این کار از تعارض پین بوت‌حساس جلوگیری می‌کند.
+
+**۴. مدیریت خطای غیرمسدودکننده:** اگر ماژول دوم پیدا نشود، برنامه متوقف نمی‌شود و با یک ماژول ادامه می‌دهد. وضعیت روی OLED نمایش داده می‌شود: `"1x NRF24 (M2 err)"`.
+
+**۵. بهینه‌سازی نمایشگر:** OLED هر ۲۰۰ میلی‌ثانیه یک بار آپدیت می‌شود، نه در هر حلقه. این کار از پرش و سوسو زدن نمایشگر جلوگیری می‌کند.
+
+**۶. تنظیمات رادیو:** توان خروجی روی `RF24_PA_MAX` (حداکثر)، سرعت داده روی `RF24_2MBPS` (سریع‌ترین) و CRC غیرفعال تنظیم شده است تا نویز خالص و بدون سربار ارسال شود.
 
 ---
 
@@ -392,7 +451,7 @@ void updateDisplay() {
 | **VCC** | 3.3V | 3.3V |
 | **GND** | GND | GND |
 
-> **توجه:** اگر از پین D3 برای CSN ماژول دوم استفاده می‌کنید، دکمه را به پین دیگری مثل RX (GPIO3) منتقل کنید. در کد، `BUTTON_PIN` را به‌روزرسانی کنید.
+> **توجه:** در حالت دو ماژول، پین D3 (GPIO0) برای CSN ماژول دوم و پین RX (GPIO3) برای دکمه استفاده می‌شود. کد جدید این تخصیص را به‌صورت خودکار با شرط `#if USE_SECOND_MODULE` مدیریت می‌کند و نیازی به تغییر دستی `BUTTON_PIN` نیست.
 
 برای هر ماژول یک خازن ۱۰۰ میکروفاراد جداگانه قرار دهید. اگر از دو ماژول PA+LNA استفاده می‌کنید، جریان مصرفی بالاتر می‌رود و بهتر است یک منبع ۳.۳ ولت مجزا با رگولاتور برای ماژول‌ها در نظر بگیرید.
 
@@ -408,7 +467,7 @@ void updateDisplay() {
 
 ### ۲. مدیریت حرارت ماژول
 
-ماژول NRF24L01+ در حین کار مداوم داغ می‌شود. این طبیعی است و به‌گفته توسعه‌دهنده پروژه، عملکرد را مختل نمی‌کند، اما اگر دستگاه را در دست بگیرید، ممکن است دستتان را بسوزاند. برای کاهش دما، سیکل کاری را کوتاه کنید. مثلا ۲۰ ثانیه کار و ۵ ثانیه استراحت. در کد می‌توانید از `millis()` برای این کار استفاده کنید.
+ماژول NRF24L01+ در حین کار مداوم داغ می‌شود. این طبیعی است و عملکرد را مختل نمی‌کند، اما اگر دستگاه را در دست بگیرید، ممکن است دستتان را بسوزاند. برای کاهش دما، سیکل کاری را کوتاه کنید. **معماری غیرمسدودکننده با `millis()` پیاده‌سازی شده است.** می‌توانید به‌سادگی یک شرط زمانی برای استراحت اضافه کنید: مثلاً بعد از ۲۰ ثانیه کار، ۵ ثانیه ماژول را خاموش کنید. ساختار کد این کار را بسیار ساده کرده است.
 
 ### ۳. آنتن بهتر، برد بیشتر
 
@@ -459,12 +518,15 @@ void updateDisplay() {
 | کد آپلود می‌شود اما اثری ندارد | برد اشتباه انتخاب شده یا فاصله زیاد | برد NodeMCU 1.0 را انتخاب کنید؛ اسپیکر را نزدیک‌تر بیاورید |
 | نمایشگر OLED روشن نمی‌شود | آدرس I2C اشتباه یا اتصال SDA/SCL جابه‌جا | آدرس I2C را با اسکچر I2C Scanner پیدا کنید؛ سیم‌ها را بررسی کنید |
 | ماژول خیلی داغ می‌شود | کار مداوم بدون استراحت | سیکل کاری را کوتاه کنید (مثلا ۲۰ ثانیه کار، ۵ ثانیه استراحت) |
-| دستگاه ریست می‌شود | افت ولتاژ هنگام ارسال | خازن بزرگ‌تر (۲۲۰ میکروفاراد) یا رگولاتور مجزا نصب کنید |
+| دستگاه ریست می‌شود | افت ولتاژ هنگام ارسال یا نگه داشتن دکمه روی GPIO0 هنگام بوت | خازن بزرگ‌تر (۲۲۰ میکروفاراد) یا رگولاتور مجزا نصب کنید؛ دکمه را در حالت دو ماژول به RX منتقل کنید |
 
 ---
 
-# نمای گرافیکی اتصالات 
+# نمای گرافیکی اتصالات
+
 در این بخش، نمای شماتیک و گرافیکی اتصالات را به‌صورت گام‌به‌گام و با جزئیات کامل می‌بینی. از سه نمای مختلف استفاده می‌کنیم: **نمای شماتیک کلی**، **نمای پین‌به‌پین ماژول‌ها** و **نمای فیزیکی چیدمان**.
+
+> **یادداشت:** نماهای ۱، ۲ و ۳ حالت تک ماژول را نشان می‌دهند. در حالت دو ماژول، دکمه به RX (GPIO3) منتقل می‌شود و CSN ماژول دوم روی D3 قرار می‌گیرد.
 
 ---
 
@@ -756,51 +818,51 @@ void updateDisplay() {
         │   │  D8   ●─────────┼───┼───┼─┼─┼───┼──┼──┐ (CSN ماژول۱) │
         │   │  D0   ●─────────┼───┼───┼─┼─┼───┼──┼──┼──┐ (CE ماژول۲)│
         │   │  D3   ●─────────┼───┼───┼─┼─┼───┼──┼──┼──┼──┐(CSN م۲)│
-        │   │  GND  ●─────────┼───┼───┼─┼─┼───┼──┼──┼──┼──┼──┐     │
-        │   └─────────────────┘   │   │ │ │   │  │  │  │  │  │     │
-        │                         │   │ │ │   │  │  │  │  │  │     │
-        └─────────────────────────┘   │ │ │   │  │  │  │  │  │     │
-                                      │ │ │   │  │  │  │  │  │     │
-                    ┌─────────────────┼─┼─┼───┼──┼──┼──┼──┼──┼─────┘
-                    │                 │ │ │   │  │  │  │  │  │
-                    │   ┌─────────────┴─┴─┴───┴──┴──┴──┴──┴──┴───────┐
-                    │   │         NRF24L01+ (ماژول اول)              │
-                    │   │                                             │
-                    │   │  VCC ●── به 3.3V (با خازن ۱۰۰µF)          │
-                    │   │  GND ●── به GND                            │
-                    │   │  CE  ●── به D4 (GPIO2)                     │
-                    │   │  CSN ●── به D8 (GPIO15)                    │
-                    │   │  SCK ●── به D5 (GPIO14) ── مشترک          │
-                    │   │  MOSI●── به D7 (GPIO13) ── مشترک          │
-                    │   │  MISO●── به D6 (GPIO12) ── مشترک          │
-                    │   │  IRQ ●── NC                                │
-                    │   └───────────────────────────────────────────┘
+        │   │  RX   ●─────────┼───┼───┼─┼─┼───┼──┼──┼──┼──┼──┐    │
+        │   │  GND  ●─────────┼───┼───┼─┼─┼───┼──┼──┼──┼──┼──┼──┐ │
+        │   └─────────────────┘   │   │ │ │   │  │  │  │  │  │  │ │
+        │                         │   │ │ │   │  │  │  │  │  │  │ │
+        └─────────────────────────┘   │ │ │   │  │  │  │  │  │  │ │
+                                      │ │ │   │  │  │  │  │  │  │ │
+                    ┌─────────────────┼─┼─┼───┼──┼──┼──┼──┼──┼──┼─┘
+                    │                 │ │ │   │  │  │  │  │  │  │
+                    │   ┌─────────────┴─┴─┴───┴──┴──┴──┴──┴──┴──┴───────┐
+                    │   │         NRF24L01+ (ماژول اول)                  │
+                    │   │                                                 │
+                    │   │  VCC ●── به 3.3V (با خازن ۱۰۰µF)              │
+                    │   │  GND ●── به GND                                │
+                    │   │  CE  ●── به D4 (GPIO2)                         │
+                    │   │  CSN ●── به D8 (GPIO15)                        │
+                    │   │  SCK ●── به D5 (GPIO14) ── مشترک              │
+                    │   │  MOSI●── به D7 (GPIO13) ── مشترک              │
+                    │   │  MISO●── به D6 (GPIO12) ── مشترک              │
+                    │   │  IRQ ●── NC                                    │
+                    │   └───────────────────────────────────────────────┘
                     │
-                    │   ┌───────────────────────────────────────────┐
-                    │   │         NRF24L01+ (ماژول دوم)              │
-                    │   │                                             │
-                    │   │  VCC ●── به 3.3V (با خازن ۱۰۰µF جداگانه)   │
-                    │   │  GND ●── به GND                            │
-                    │   │  CE  ●── به D0 (GPIO16)                    │
-                    │   │  CSN ●── به D3 (GPIO0)                     │
-                    │   │  SCK ●── به D5 (GPIO14) ── مشترک با م۱    │
-                    │   │  MOSI●── به D7 (GPIO13) ── مشترک با م۱    │
-                    │   │  MISO●── به D6 (GPIO12) ── مشترک با م۱    │
-                    │   │  IRQ ●── NC                                │
-                    │   └───────────────────────────────────────────┘
+                    │   ┌───────────────────────────────────────────────┐
+                    │   │         NRF24L01+ (ماژول دوم)                  │
+                    │   │                                                 │
+                    │   │  VCC ●── به 3.3V (با خازن ۱۰۰µF جداگانه)       │
+                    │   │  GND ●── به GND                                │
+                    │   │  CE  ●── به D0 (GPIO16)                        │
+                    │   │  CSN ●── به D3 (GPIO0)                         │
+                    │   │  SCK ●── به D5 (GPIO14) ── مشترک با م۱        │
+                    │   │  MOSI●── به D7 (GPIO13) ── مشترک با م۱        │
+                    │   │  MISO●── به D6 (GPIO12) ── مشترک با م۱        │
+                    │   │  IRQ ●── NC                                    │
+                    │   └───────────────────────────────────────────────┘
                     │
                     │   ┌───────────────────┐
                     │   │  دکمه فشاری       │
                     │   │  (به پین RX منتقل │
-                    │   │   شود چون D3 اشغال│
-                    │   │   شده است)        │
+                    │   │   می‌شود)          │
                     │   │  یک سر → RX       │
                     │   │  سر دیگر → GND    │
                     │   └───────────────────┘
                     │
 ```
 
-> **نکته مهم:** در حالت دو ماژول، پین D3 برای CSN ماژول دوم استفاده می‌شود، بنابراین دکمه را باید به پین **RX (GPIO3)** منتقل کنی و در کد `BUTTON_PIN` را به `3` تغییر دهی.
+> **نکته مهم:** در حالت دو ماژول، پین D3 برای CSN ماژول دوم و پین RX (GPIO3) برای دکمه استفاده می‌شود. کد جدید این تخصیص را به‌صورت خودکار مدیریت می‌کند، بنابراین فقط سیم دکمه را به RX منتقل کن و نیازی به تغییر کد نداری.
 
 ---
 
@@ -850,7 +912,8 @@ void updateDisplay() {
 │  3.3V            │  VCC             │  🔴 قرمز         │  تغذیه مثبت        │
 │  GND             │  GND             │  ⚫ مشکی         │  زمین              │
 ├──────────────────┼──────────────────┼──────────────────┼────────────────────┤
-│  دکمه به RX (GPIO3) منتقل شود چون D3 اشغال شده است.                          │
+│  در حالت دو ماژول، دکمه به‌صورت خودکار توسط کد به RX (GPIO3) منتقل     │
+│  می‌شود. فقط سیم را به RX وصل کن.                                       │
 └──────────────────┴──────────────────┴──────────────────┴────────────────────┘
 ```
 
