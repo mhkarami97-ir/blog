@@ -30,7 +30,7 @@ tags:
 بطور مثال `SQL Change Automation` فقط با standard فعال می‌شود.  
 برای این کار کافی است در ابزار فعال ساز حالت standard را انتخاب کنید.  
 
-![red-gate](/assets/img/red-gate.png)  
+![red-gate](/assets/img/red-gate.jpg)  
 
 اگر از قبل فعال سازی کرده‌اید اما به خطا خورده است می‌توانید از آدرس زیر یکبار سریال ابزار مورد نظر با فرمت `lic` را پاک کنید و بعد از بستن و دوباره باز کردن `SQL Server Management Studio` ابزار فوق را فعال سازی کنید.  
 
