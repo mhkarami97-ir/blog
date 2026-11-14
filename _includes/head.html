@@ -294,9 +294,23 @@
       color: var(--text-color, #2a2a2a);
       border: 1px solid var(--btn-border-color, rgba(0, 0, 0, 0.12));
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-      transition: all 0.25s ease-in-out;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, color 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Desktop (>= 850px): The fixed sidebar occupies left 0 to 260px, so we offset the button past the sidebar */
+    @media (min-width: 850px) {
+      .floating-contact-btn {
+        left: calc(260px + 20px);
+      }
+    }
+
+    /* Extra-large screens (>= 1650px): The sidebar expands to 300px */
+    @media (min-width: 1650px) {
+      .floating-contact-btn {
+        left: calc(300px + 20px);
+      }
     }
 
     .floating-contact-btn:hover {
@@ -374,6 +388,21 @@
           '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' +
           '<span>تماس با ما</span>';
         document.body.appendChild(btn);
+
+        function adjustPosition() {
+          var sidebar = document.getElementById('sidebar');
+          if (sidebar && window.innerWidth >= 850) {
+            var rect = sidebar.getBoundingClientRect();
+            if (rect.width > 0 && rect.right > 0 && rect.left >= 0) {
+              btn.style.left = (rect.right + 20) + 'px';
+              return;
+            }
+          }
+          btn.style.left = '';
+        }
+
+        adjustPosition();
+        window.addEventListener('resize', adjustPosition, { passive: true });
       }
 
       if (document.readyState === 'loading') {
