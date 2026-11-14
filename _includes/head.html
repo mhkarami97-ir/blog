@@ -270,4 +270,117 @@
   {% endif %}
 
   {% include metadata-hook.html %}
+  <!-- Floating Contact Button -->
+  <style>
+    .floating-contact-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 990;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 7px 14px;
+      font-family: inherit;
+      font-size: 0.825rem;
+      font-weight: 500;
+      line-height: 1.4;
+      text-decoration: none !important;
+      border-radius: 50px;
+      direction: rtl;
+      cursor: pointer;
+      background-color: var(--card-bg, #ffffff);
+      color: var(--text-color, #2a2a2a);
+      border: 1px solid var(--btn-border-color, rgba(0, 0, 0, 0.12));
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease-in-out;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .floating-contact-btn:hover {
+      transform: translateY(-2px);
+      color: var(--link-color, #2a408e);
+      border-color: var(--link-color, #2a408e);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+    }
+
+    .floating-contact-btn:active {
+      transform: translateY(0);
+    }
+
+    .floating-contact-btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    .floating-contact-btn:hover svg {
+      transform: scale(1.1);
+    }
+
+    html[data-mode='dark'] .floating-contact-btn {
+      background-color: var(--card-bg, #1e1e20);
+      color: var(--text-color, #dfdfdf);
+      border-color: var(--btn-border-color, rgba(255, 255, 255, 0.15));
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+
+    html[data-mode='dark'] .floating-contact-btn:hover {
+      color: var(--link-color, #6298f8);
+      border-color: var(--link-color, #6298f8);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      html:not([data-mode]) .floating-contact-btn {
+        background-color: var(--card-bg, #1e1e20);
+        color: var(--text-color, #dfdfdf);
+        border-color: var(--btn-border-color, rgba(255, 255, 255, 0.15));
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      }
+
+      html:not([data-mode]) .floating-contact-btn:hover {
+        color: var(--link-color, #6298f8);
+        border-color: var(--link-color, #6298f8);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .floating-contact-btn {
+        bottom: 15px;
+        left: 15px;
+        padding: 6px 12px;
+        font-size: 0.775rem;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      function addFloatingContactButton() {
+        if (document.getElementById('floating-contact-btn')) return;
+        var btn = document.createElement('a');
+        btn.id = 'floating-contact-btn';
+        btn.className = 'floating-contact-btn';
+        btn.href = 'https://mhkarami97.ir';
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.setAttribute('aria-label', 'تماس با ما');
+        btn.title = 'تماس با ما - mhkarami97.ir';
+        btn.innerHTML =
+          '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' +
+          '<span>تماس با ما</span>';
+        document.body.appendChild(btn);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addFloatingContactButton);
+      } else {
+        addFloatingContactButton();
+      }
+    })();
+  </script>
 </head>
