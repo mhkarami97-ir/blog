@@ -274,8 +274,9 @@
   <style>
     .floating-contact-btn {
       position: fixed;
+      right: 1rem;
+      left: auto;
       bottom: 20px;
-      left: 20px;
       z-index: 990;
       display: inline-flex;
       align-items: center;
@@ -299,17 +300,30 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Desktop (>= 850px): The fixed sidebar occupies left 0 to 260px, so we offset the button past the sidebar */
-    @media (min-width: 850px) {
+    #back-to-top {
+      right: 1rem !important;
+      left: auto !important;
+    }
+
+    /* Responsive right alignment matching #back-to-top */
+    @media (min-width: 992px) {
+      #back-to-top,
       .floating-contact-btn {
-        left: calc(260px + 20px);
+        right: 5% !important;
       }
     }
 
-    /* Extra-large screens (>= 1650px): The sidebar expands to 300px */
-    @media (min-width: 1650px) {
+    @media (min-width: 1400px) {
+      #back-to-top,
       .floating-contact-btn {
-        left: calc(300px + 20px);
+        right: calc((100vw - 260px - 1140px) / 2 + 3rem) !important;
+      }
+    }
+
+    @media (min-width: 1650px) {
+      #back-to-top,
+      .floating-contact-btn {
+        right: calc((100vw - 300px - 1140px) / 2 + 2rem) !important;
       }
     }
 
@@ -364,9 +378,11 @@
     }
 
     @media (max-width: 576px) {
+      #back-to-top,
       .floating-contact-btn {
-        bottom: 15px;
-        left: 15px;
+        right: 1rem !important;
+      }
+      .floating-contact-btn {
         padding: 6px 12px;
         font-size: 0.775rem;
       }
@@ -390,19 +406,41 @@
         document.body.appendChild(btn);
 
         function adjustPosition() {
-          var sidebar = document.getElementById('sidebar');
-          if (sidebar && window.innerWidth >= 850) {
-            var rect = sidebar.getBoundingClientRect();
-            if (rect.width > 0 && rect.right > 0 && rect.left >= 0) {
-              btn.style.left = (rect.right + 20) + 'px';
+          var b2t = document.getElementById('back-to-top');
+          if (b2t) {
+            b2t.style.bottom = '';
+            var rect = b2t.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              // Match right alignment with #back-to-top
+              var rightOffset = window.innerWidth - rect.right;
+              if (rightOffset >= 0) {
+                btn.style.right = rightOffset + 'px';
+                btn.style.left = 'auto';
+              }
+
+              // Position underneath #back-to-top with a few pixels gap
+              var gap = 8;
+              var btnHeight = btn.offsetHeight || 35;
+              var b2tBottom = window.innerHeight - rect.bottom;
+              var targetBottom = b2tBottom - gap - btnHeight;
+
+              if (targetBottom >= 10) {
+                btn.style.bottom = targetBottom + 'px';
+              } else {
+                var needed = (btnHeight + gap + 10) - b2tBottom;
+                if (needed > 0) {
+                  b2t.style.bottom = (b2tBottom + needed) + 'px';
+                }
+                btn.style.bottom = '10px';
+              }
               return;
             }
           }
-          btn.style.left = '';
         }
 
         adjustPosition();
         window.addEventListener('resize', adjustPosition, { passive: true });
+        window.addEventListener('load', adjustPosition, { passive: true });
       }
 
       if (document.readyState === 'loading') {
