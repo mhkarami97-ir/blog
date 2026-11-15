@@ -305,25 +305,31 @@
       left: auto !important;
     }
 
-    /* Responsive right alignment matching #back-to-top */
+    /* Responsive center alignment under #back-to-top */
     @media (min-width: 992px) {
-      #back-to-top,
-      .floating-contact-btn {
+      #back-to-top {
         right: 5% !important;
+      }
+      .floating-contact-btn {
+        right: calc(5% - 35px);
       }
     }
 
     @media (min-width: 1400px) {
-      #back-to-top,
-      .floating-contact-btn {
+      #back-to-top {
         right: calc((100vw - 260px - 1140px) / 2 + 3rem) !important;
+      }
+      .floating-contact-btn {
+        right: calc((100vw - 260px - 1140px) / 2 + 3rem - 35px);
       }
     }
 
     @media (min-width: 1650px) {
-      #back-to-top,
-      .floating-contact-btn {
+      #back-to-top {
         right: calc((100vw - 300px - 1140px) / 2 + 2rem) !important;
+      }
+      .floating-contact-btn {
+        right: calc((100vw - 300px - 1140px) / 2 + 2rem - 35px);
       }
     }
 
@@ -378,8 +384,7 @@
     }
 
     @media (max-width: 576px) {
-      #back-to-top,
-      .floating-contact-btn {
+      #back-to-top {
         right: 1rem !important;
       }
       .floating-contact-btn {
@@ -411,11 +416,13 @@
             b2t.style.bottom = '';
             var rect = b2t.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
-              var rightOffset = window.innerWidth - rect.right;
-              if (rightOffset >= 0) {
-                btn.style.right = rightOffset + 'px';
-                btn.style.left = 'auto';
-              }
+              var btnWidth = btn.offsetWidth || 115;
+              var b2tRightDist = window.innerWidth - rect.right;
+              var centerRightOffset = b2tRightDist + (rect.width - btnWidth) / 2;
+              var safeRight = Math.max(10, Math.min(window.innerWidth - btnWidth - 10, centerRightOffset));
+              btn.style.right = safeRight + 'px';
+              btn.style.left = 'auto';
+
               var gap = 8;
               var btnHeight = btn.offsetHeight || 35;
               var b2tBottom = window.innerHeight - rect.bottom;
