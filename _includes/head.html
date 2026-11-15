@@ -416,10 +416,11 @@
             b2t.style.bottom = '';
             var rect = b2t.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
+              var clientWidth = document.documentElement.clientWidth || window.innerWidth;
               var btnWidth = btn.offsetWidth || 115;
-              var b2tRightDist = window.innerWidth - rect.right;
+              var b2tRightDist = clientWidth - rect.right;
               var centerRightOffset = b2tRightDist + (rect.width - btnWidth) / 2;
-              var safeRight = Math.max(10, Math.min(window.innerWidth - btnWidth - 10, centerRightOffset));
+              var safeRight = Math.max(10, Math.min(clientWidth - btnWidth - 10, centerRightOffset));
               btn.style.right = safeRight + 'px';
               btn.style.left = 'auto';
 

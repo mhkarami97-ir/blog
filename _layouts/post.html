@@ -15,6 +15,12 @@ script_includes:
 
 <article class="px-1" data-toc="{{ enable_toc }}">
   <header>
+    <div class="read-mode-wrapper d-none d-md-flex justify-content-end mb-2">
+      <button id="read-mode-toggle" type="button" class="btn read-mode-btn" aria-label="حالت خواندن" title="حالت خواندن">
+        <i class="fa-solid fa-book-open"></i>
+        <span>حالت خواندن</span>
+      </button>
+    </div>
     <h1 data-toc-skip>{{ page.title }}</h1>
     {% if page.description %}
       <p class="post-desc fw-light mb-4">{{ page.description }}</p>
@@ -100,3 +106,110 @@ script_includes:
   </div>
   <!-- div.post-tail-wrapper -->
 </article>
+
+<style>
+  .read-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    font-size: 0.825rem;
+    font-weight: 500;
+    line-height: 1.4;
+    border-radius: 50px;
+    cursor: pointer;
+    background-color: var(--card-bg, #ffffff);
+    color: var(--text-color, #2a2a2a);
+    border: 1px solid var(--btn-border-color, rgba(0, 0, 0, 0.12));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .read-mode-btn:hover {
+    color: var(--link-color, #2a408e);
+    border-color: var(--link-color, #2a408e);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+  body.read-mode .read-mode-btn {
+    background-color: var(--link-color, #2a408e);
+    color: #ffffff !important;
+    border-color: var(--link-color, #2a408e);
+    box-shadow: 0 4px 14px rgba(42, 64, 142, 0.3);
+  }
+  html[data-mode='dark'] .read-mode-btn {
+    background-color: var(--card-bg, #1e1e20);
+    color: var(--text-color, #dfdfdf);
+    border-color: var(--btn-border-color, rgba(255, 255, 255, 0.15));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  html[data-mode='dark'] .read-mode-btn:hover {
+    color: var(--link-color, #6298f8);
+    border-color: var(--link-color, #6298f8);
+  }
+  html[data-mode='dark'] body.read-mode .read-mode-btn {
+    background-color: var(--link-color, #6298f8);
+    color: #1b1b1e !important;
+    border-color: var(--link-color, #6298f8);
+  }
+
+  /* Reader Mode Layout Overrides */
+  body.read-mode #sidebar,
+  body.read-mode #panel-wrapper {
+    display: none !important;
+  }
+  body.read-mode #main-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  body.read-mode #main-wrapper > .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 2.5rem !important;
+    padding-right: 2.5rem !important;
+  }
+  body.read-mode main[aria-label="Main Content"],
+  body.read-mode #tail-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: 0 0 100% !important;
+  }
+  body.read-mode #topbar-wrapper {
+    left: 0 !important;
+    right: 0 !important;
+  }
+</style>
+
+<script>
+  (function () {
+    function initReadMode() {
+      var toggleBtn = document.getElementById('read-mode-toggle');
+      if (!toggleBtn) return;
+      toggleBtn.addEventListener('click', function () {
+        var isRead = document.body.classList.toggle('read-mode');
+        var icon = toggleBtn.querySelector('i');
+        var text = toggleBtn.querySelector('span');
+        if (isRead) {
+          if (icon) icon.className = 'fa-solid fa-compress';
+          if (text) text.textContent = 'خروج از حالت خواندن';
+          toggleBtn.setAttribute('title', 'خروج از حالت خواندن');
+          toggleBtn.setAttribute('aria-label', 'خروج از حالت خواندن');
+        } else {
+          if (icon) icon.className = 'fa-solid fa-book-open';
+          if (text) text.textContent = 'حالت خواندن';
+          toggleBtn.setAttribute('title', 'حالت خواندن');
+          toggleBtn.setAttribute('aria-label', 'حالت خواندن');
+        }
+        window.dispatchEvent(new Event('resize'));
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initReadMode);
+    } else {
+      initReadMode();
+    }
+  })();
+</script>
+
