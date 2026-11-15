@@ -411,19 +411,15 @@
             b2t.style.bottom = '';
             var rect = b2t.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
-              // Match right alignment with #back-to-top
               var rightOffset = window.innerWidth - rect.right;
               if (rightOffset >= 0) {
                 btn.style.right = rightOffset + 'px';
                 btn.style.left = 'auto';
               }
-
-              // Position underneath #back-to-top with a few pixels gap
               var gap = 8;
               var btnHeight = btn.offsetHeight || 35;
               var b2tBottom = window.innerHeight - rect.bottom;
               var targetBottom = b2tBottom - gap - btnHeight;
-
               if (targetBottom >= 10) {
                 btn.style.bottom = targetBottom + 'px';
               } else {
@@ -433,7 +429,6 @@
                 }
                 btn.style.bottom = '10px';
               }
-              return;
             }
           }
         }
