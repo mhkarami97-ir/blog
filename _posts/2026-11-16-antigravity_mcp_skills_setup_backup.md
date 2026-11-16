@@ -1,13 +1,13 @@
 ---
 title: "از چت ساده تا توسعه تمام‌عیار: راهنمای جامع هوش مصنوعی عامل‌محور، MCP، مهارت‌ها و قوانین در Google Antigravity"
-description: "راهنمای عمیق و پایه‌ای مفاهیم AI Agent، پروتکل MCP، روش نصب و تفاوت مهارت‌های سراسری و پروژه‌ای، پوشه‌های خودکار کشف، تحلیل کامل ۱۲ اصل GEMINI.md و ترفندهای حرفه‌ای کار با ایجنت‌ها."
+description: "راهنمای عمیق و پایه‌ای مفاهیم AI Agent، پروتکل MCP، نصب مجموعه سرورهای وب فارسی iran-mcp، روش نصب و تفاوت مهارت‌های سراسری و پروژه‌ای، پوشه‌های خودکار کشف، تحلیل کامل ۱۲ اصل GEMINI.md و ترفندهای حرفه‌ای کار با ایجنت‌ها."
 categories: [AI, Architecture, Tool]
-tags: [antigravity, ai-agent, mcp, model-context-protocol, skills, gemini-md, clean-code, devops, chirpy]
+tags: [antigravity, ai-agent, mcp, model-context-protocol, skills, iran-mcp, gemini-md, clean-code, devops, chirpy]
 ---
 
 اگر تا امروز تعامل شما با هوش مصنوعی صرفاً در حد ارسال پرامپت در وب‌سایت‌هایی مثل ChatGPT یا Claude و کپی-پیست کردن تکه کدها در ادیتور بوده است، باید بدانید که دنیای مهندسی نرم‌افزار وارد دوران متفاوتی به نام **توسعه مبتنی بر ایجنت (Agentic Software Engineering)** شده است.
 
-در این مقاله، از مبانی اولیه شروع می‌کنیم: اینکه یک **ایجنت (AI Agent)** چیست و چه فرقی با یک چت‌بات معمولی دارد، پروتکل **MCP** چه مشکلی را حل کرده است، **مهارت‌ها (Skills)**، **نقش‌ها (Roles/Subagents)** و **پلاگین‌ها (Plugins)** چطور کار می‌کنند، تفاوت مهارت‌های پروژه‌ای با سراسری چیست، ایجنت به صورت خودکار چه مسیرهایی را اسکن می‌کند، و چگونه فایل قانون اساسی سیستم یعنی **`GEMINI.md`** با ۱۲ اصل دقیق مهندسی کیفیت و امنیت خروجی را تضمین می‌کند. در انتها نیز ترفندهای کاربردی و تجربیات عملی کار با ایجنت‌ها را مرور می‌کنیم.
+در این مقاله، از مبانی اولیه شروع می‌کنیم: اینکه یک **ایجنت (AI Agent)** چیست و چه فرقی با یک چت‌بات معمولی دارد، پروتکل **MCP** چه مشکلی را حل کرده است، **مهارت‌ها (Skills)**، **نقش‌ها (Roles/Subagents)** و **پلاگین‌ها (Plugins)** چطور کار می‌کنند، تفاوت مهارت‌های پروژه‌ای با سراسری چیست، ایجنت به صورت خودکار چه مسیرهایی را اسکن می‌کند، چگونه پکیج عظیم **iran-mcp** (شامل ۷۷ سرور وب فارسی) را راه‌اندازی کنیم، و چگونه فایل قانون اساسی سیستم یعنی **`GEMINI.md`** با ۱۲ اصل دقیق مهندسی کیفیت و امنیت خروجی را تضمین می‌کند. در انتها نیز ترفندهای کاربردی و تجربیات عملی کار با ایجنت‌ها را مرور می‌کنیم.
 
 ---
 
@@ -52,7 +52,7 @@ tags: [antigravity, ai-agent, mcp, model-context-protocol, skills, gemini-md, cl
 
 ## ۳. معرفی سرورهای MCP نصب‌شده و کاربرد هریک
 
-در کانفیگ پیشرفته ما، سرورهای زیر فعال شده‌اند:
+در کانفیگ پیشرفته ما، سرورهای بین‌المللی و بومی زیر فعال شده‌اند:
 
 ### ۱. `microsoft-learn` (ریموت - Streamable HTTP)
 * **آدرس:** `https://learn.microsoft.com/api/mcp`
@@ -80,6 +80,18 @@ tags: [antigravity, ai-agent, mcp, model-context-protocol, skills, gemini-md, cl
 
 ### ۶. `corporate-internal-gateway` (ریموت با احراز هویت)
 * **کاربرد:** اتصال به سرورهای محلی سازمان (مثل سرورهای Azure DevOps، ریپازیتوری‌های خصوصی و Team Memory). تیم‌های فنی با استفاده از حافظه تیمی مشترک در MCP می‌توانند تصمیمات معماری، قراردادهای API و قوانین بیزینس را با هوش مصنوعی به اشتراک بگذارند.
+
+### ۷. ابرپکیج `iran-mcp` (۷۷ سرور و ۹۹۴ ابزار اختصاصی وب فارسی)
+* **مخزن گیت‌هاب:** [sepehr071/iran-mcp](https://github.com/sepehr071/iran-mcp)
+* **کاربرد:** یکی از هیجان‌انگیزترین مجموعه‌های متصل به ایجنت ما! این پروژه دسترسی بلادرنگ به داده‌های زنده وب فارسی، قیمت‌ها به تومان، نوبت‌های پزشکی و سامانه‌های اداری کشور را برای ایجنت فراهم می‌کند. هر سرور یک پکیج پایتونی سبک است که به کمک دستور فوق‌سریع `uvx` اجرا می‌شود:
+  * **فروشگاه‌ها و مقایسه قیمت:** دیجی‌کالا (`digikala`)، ترب (`torob`)، ایمالز (`emalls-ir`)، باسلام (`basalam`)، تکنولایف (`technolife`)، اسنپ‌شاپ (`snappshop`).
+  * **غذا و سوپرمارکت:** اسنپ‌فود (`snapp`)، اکالا (`okala`)، تپسی‌فود (`tapsifood`).
+  * **خودرو و املاک:** دیوار (`divar`)، شیپور (`sheypoor`)، باما (`bama-ir`)، کارنامه (`karnameh`).
+  * **سفر و اقامت:** علی‌بابا (`alibaba-ir`)، جاباما (`jabama`)، مستربلیط (`mrbilit`)، فلای‌تودی (`flytoday`)، اقامت۲۴ (`eghamat24`).
+  * **نقشه و ترافیک:** نشان (`neshan`)، بلد (`balad`).
+  * **پزشکی و دارویی:** پذیرش۲۴ (`paziresh24`)، دکترتو (`doctoreto`)، داروکده (`darukade`)، اکسیریاب (`exiryab`).
+  * **مالی، بورس و ارز:** شبکه طلا و ارز (`tgju`)، بورس تهران (`tsetmc`)، سامانه کدال (`codal`)، بانک مرکزی (`cbi`)، میلی‌گلد (`milligold`).
+  * **قوانین و استعلامات اداری:** سامانه قوانین کشور (`qavanin`)، روزنامه رسمی (`rrk`)، رسمیو (`rasmio`)، امور مالیاتی (`iran-tax`).
 
 ---
 
@@ -164,25 +176,32 @@ my-project/
    ```
 ۴. پوشه‌ای به نام `skills` ساخته و فولدرهای مهارت را در آن کپی کنید.
 
-### روش سوم: کلون مستقیم ریپازیتوری‌های مهارت (مانند `mblode/agent-skills`)
+### روش سوم: کلون و نصب مخازن بزرگ مهارت (مانند `iran-mcp` یا `mblode/agent-skills`)
 می‌توانید مخازن مهارت‌های متن‌باز را مستقیماً با گیت کلون کرده و کپی کنید:
 ```powershell
 # ۱. کلون ریپازیتوری در پوشه موقت
-git clone --depth 1 https://github.com/mblode/agent-skills.git "$env:TEMP\agent-skills"
+git clone --depth 1 https://github.com/sepehr071/iran-mcp.git "$env:TEMP\iran-mcp"
 
-# ۲. کپی به پلاگین سراسری در Antigravity
-New-Item -ItemType Directory -Path "$env:USERPROFILE\.gemini\config\plugins\mblode-agent-skills\skills" -Force
-Copy-Item -Path "$env:TEMP\agent-skills\skills\*" -Destination "$env:USERPROFILE\.gemini\config\plugins\mblode-agent-skills\skills" -Recurse -Force
+# ۲. ایجاد پوشه پلاگین در Antigravity
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.gemini\config\plugins\iran-mcp\skills" -Force
 
-# ۳. پاک‌سازی پوشه موقت
-Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
+# ۳. کپی کردن مهارت‌ها از ساب‌فولدرهای پلاگین
+Get-ChildItem -Directory -Path "$env:TEMP\iran-mcp\plugins" | ForEach-Object {
+    $s = Join-Path $_.FullName "skills"
+    if (Test-Path $s) {
+        Copy-Item -Path "$s\*" -Destination "$env:USERPROFILE\.gemini\config\plugins\iran-mcp\skills" -Recurse -Force
+    }
+}
+
+# ۴. پاک‌سازی دایرکتوری موقت
+Remove-Item -Path "$env:TEMP\iran-mcp" -Recurse -Force
 ```
 
 ---
 
 ## ۸. دسته‌بندی و معرفی تفصیلی مهارت‌های نصب‌شده
 
-سیستم ما مجهز به دو مجموعه قدرتمند مهارت است: مجموعه **`mblode/agent-skills`** و بسته جامع **ECC (Everything Coding Copilot)**:
+سیستم ما اکنون مجهز به ۳ بسته قدرتمند مهارت است: مجموعه **`mblode/agent-skills`**، پکیج **ECC (Everything Coding Copilot)** و بسته بومی **`iran-mcp`** (در مجموع بالغ بر ۱۷۰ مهارت فعال):
 
 ### الف) مهارت‌های معماری و مهندسی پایپ‌لاین (Architecture & DevOps)
 * **`codebase-architecture`**: طراحی ماژول‌ها، شناسایی ماژول‌های کم‌عمق (Shallow Modules) و تعیین مرزهای لایه‌ای معماری.
@@ -219,6 +238,12 @@ Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
 * **`ghostwriter`**: نگارش حرفه‌ای متن‌ها، مستندات، پیام‌های کامیت و تیکت‌ها با لحن طبیعی انسانی بدون رد پای هوش مصنوعی.
 * **`rtl-bidirectional-formatter`**: مهارت بومی ما برای تنظیم دقیق متون فارسی راست‌به‌چپ، ایزوله‌سازی کلمات انگلیسی، حفظ جهت تاریخ‌ها و کدهای چندخطی LTR.
 
+### هـ) مهارت‌های زیست‌بوم و وب فارسی (Iran Web & Local Services)
+* **قوانین و استانداردهای بومی:** این ۷۷ مهارت به ایجنت آموزش می‌دهند که:
+  * مبالغ همیشه به **تومان** محاسبه شوند و با ریال اشتباه گرفته نشوند.
+  * رفتار سرورها **صرفاً خواندنی (Read-Only)** است و ایجنت هرگز سعی در پرداخت یا ثبت سبد خرید نکند.
+  * در صورت بروز محدودیت ریت‌لیمیت سایت‌ها، از متغیرهای پراکسی اختصاصی استفاده شود.
+
 ---
 
 ## ۹. نقش‌ها و زیرایجنت‌ها (Subagents / Roles)
@@ -241,7 +266,7 @@ Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
 
 ### ۱. حالت خودکار (Model Decision):
 هوش مصنوعی بر اساس شرح کارهایی که در فایل‌های مانیفست دارد، تصمیم می‌گیرد کدام ابزار یا مهارت را فراخوانی کند.
-* مثلاً اگر بگویید: *«ظاهر این دکمه را بررسی کن و ببین چرا وقتی متن طولانی می‌شود چیدمان به هم می‌ریزد»*، مدل خودبه‌خود مهارت `break-ui` یا ابزار `chrome-devtools` را فعال می‌کند.
+* مثلاً اگر بگویید: *«ارزان‌ترین لپ‌تاپ ایسوس با پردازنده i7 را در دیجی‌کالا و ترب پیدا کن»*، مدل خودبه‌خود مهارت‌های `digikala` و `torob` را با ابزارهای `dk_find_cheapest` و `torob_search` فعال می‌کند.
 
 ### ۲. حالت دستی صریح (User Invocation):
 شما می‌توانید مدل را مستقیماً هدایت کنید:
@@ -489,12 +514,12 @@ Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
 
 ---
 
-## ۱۳. آموزش گام‌به‌گام راه‌اندازی فایل پیکربندی `mcp_config.json` در ویندوز
+## ۱۳. نمونه کامل پیکربندی `mcp_config.json` با سرورهای ایرانی و بین‌المللی
 
 فایل تنظیمات سرورهای MCP در مسیر زیر قرار دارد:
 `%USERPROFILE%\.gemini\config\mcp_config.json`
 
-یک نمونه کامل، استاندارد و بدون باگ:
+یک نمونه گلچین‌شده و آماده کپی شامل سرورهای ریموت، محلی و ابزارهای وب فارسی با `uvx`:
 
 ```json
 {
@@ -521,12 +546,44 @@ Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
         "Authorization": "Bearer <YOUR_CONTEXT7_TOKEN>"
       }
     },
-    "internal-company-gateway": {
-      "url": "https://mcp.my-organization.local/mcp",
-      "headers": {
-        "Authorization": "Bearer <YOUR_COMPANY_TOKEN>",
-        "X-Organization": "core-team"
-      }
+    "digikala": {
+      "command": "uvx",
+      "args": [
+        "digikala-mcp@0.6.1"
+      ]
+    },
+    "torob": {
+      "command": "uvx",
+      "args": [
+        "torob-mcp@0.2.1"
+      ]
+    },
+    "divar": {
+      "command": "uvx",
+      "args": [
+        "divar-mcp@0.2.1"
+      ]
+    },
+    "snapp": {
+      "command": "uvx",
+      "args": [
+        "snapp-mcp@0.4.0"
+      ]
+    },
+    "tgju": {
+      "command": "uvx",
+      "args": [
+        "tgju-mcp@0.2.0"
+      ]
+    },
+    "tsetmc": {
+      "command": "uvx",
+      "args": [
+        "tsetmc-mcp@0.2.0"
+      ]
+    },
+    "pasavard": {
+      "url": "https://pasavard.ir/api/mcp"
     }
   }
 }
@@ -536,7 +593,7 @@ Remove-Item -Path "$env:TEMP\agent-skills" -Recurse -Force
 
 ## ۱۴. راهنمای پشتیبان‌گیری (Backup) و انتقال به سیستم جدید
 
-تمام سرمایه‌گذاری دانشی شما (کانفیگ‌های MCP، پلاگین‌ها، اسکریپت‌ها و مهارت‌ها) در دو دایرکتوری در پوشه خانگی شما قرار دارند:
+تمام سرمایه‌گذاری دانشی شما (کانفیگ‌های MCP، پلاگین‌ها، اسکریپت‌ها، سرورهای وب فارسی و مهارت‌ها) در دو دایرکتوری در پوشه خانگی شما قرار دارند:
 1. `%USERPROFILE%\.gemini\config`
 2. `%USERPROFILE%\.agents`
 
@@ -553,9 +610,9 @@ Copy-Item -Path "$env:USERPROFILE\Desktop\temp_extract\.agents\*" -Destination "
 Remove-Item -Path "$env:USERPROFILE\Desktop\temp_extract" -Recurse -Force
 ```
 
-پس از آن، با اجرای دستور زیر در ترمینال، ابزارهای Stdio کروم را نیز آماده به کار کنید:
+پس از آن، با اجرای دستور زیر در ترمینال سیستم جدید، ابزارهای Stdio کروم را نیز آماده به کار کنید:
 ```powershell
 npm install -g chrome-devtools-mcp
 ```
 
-اکنون سیستم جدید شما نیز با تمام قدرت دانشی و ابزاری گذشته آماده همراهی شما در پروژه‌هاست.
+اکنون سیستم جدید شما نیز با تمام قدرت دانشی، ابزارهای بین‌المللی و سرورهای وب فارسی آماده همراهی شما در پروژه‌هاست.
