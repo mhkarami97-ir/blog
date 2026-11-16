@@ -3,6 +3,7 @@ title: "پروتکل MCP چگونه کار می‌کند و چطور یک سرو
 description: "کالبدشکافی فنی پروتکل ارتباط مدل (MCP)، جریان پیام‌های JSON-RPC 2.0، ترنسپورت‌های stdio و SSE، مقایسه با LSP و آموزش گام‌به‌گام پیاده‌سازی سرور عملیاتی با TypeScript برای جستجو و خواندن مقالات وبلاگ."
 categories: [AI, Architecture, MCP]
 tags: [mcp, model-context-protocol, typescript, nodejs, json-rpc, ai-agent, antigravity, claude]
+mermaid: true
 ---
 
 تا پیش از معرفی **پروتکل ارتباط مدل (Model Context Protocol یا به اختصار MCP)**، اتصال مدل‌های هوش مصنوعی (LLM) به ابزارها، دیتابیس‌ها و سرویس‌های بیرونی مانند وضعیت توسعه نرم‌افزار در دهه‌های گذشته بود؛ دورانی که هر پرینتر، اسکنر یا کارت گرافیک نیاز به درایور و کابل اختصاصی داشت.
@@ -35,29 +36,35 @@ flowchart LR
         LLM <--> MCPClient["کلاینت داخلی (MCP Client)"]
     end
 
-    subgraph Boundaries ["مرز امنیتی / لایه ترنسپورت (Transport)"]
-        direction TB
+    subgraph Boundaries ["مرز امنیتی و ترنسپورت"]
         T1["stdio (Subprocess IPC)"]
         T2["SSE / HTTP Streaming"]
     end
 
     subgraph MCPServer ["سرور MCP (Server)"]
-        Router["هسته مسیریابی (Core Router)"]
+        Router["هسته مسیریابی (Router)"]
         Tools["ابزارها (Tools)"]
         Resources["منابع (Resources)"]
         Prompts["پرامپت‌ها (Prompts)"]
     end
 
     subgraph ExternalWorld ["دنیای خارج"]
-        API["سایت / وب‌سرویس"]
-        DB["دیتابیس"]
-        Files["فایل‌های سیستم"]
+        API["وب‌سرویس / ایندکس وبلاگ"]
+        DB["دیتابیس / منابع داده"]
     end
 
-    MCPClient <--> Boundaries
-    Boundaries <--> Router
-    Router --> Tools & Resources & Prompts
-    Tools & Resources --> ExternalWorld
+    MCPClient <--> T1
+    MCPClient <--> T2
+    T1 <--> Router
+    T2 <--> Router
+
+    Router --> Tools
+    Router --> Resources
+    Router --> Prompts
+
+    Tools --> API
+    Tools --> DB
+    Resources --> API
 ```
 
 ### ۱. میزبان (Host):
