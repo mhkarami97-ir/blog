@@ -1,5 +1,5 @@
 ---
-title: "از چت ساده تا توسعه تمام‌عیار: راهنمای جامع هوش مصنوعی عامل‌محور، MCP، مهارت‌ها و قوانین در Google Antigravity"
+title: "از چت ساده تا توسعه تمام‌عیار راهنمای جامع هوش مصنوعی عامل‌محور، MCP، مهارت‌ها و قوانین در Google Antigravity"
 description: "راهنمای عمیق و پایه‌ای مفاهیم AI Agent، پروتکل MCP، نصب مجموعه سرورهای وب فارسی iran-mcp، روش نصب و تفاوت مهارت‌های سراسری و پروژه‌ای، پوشه‌های خودکار کشف، تحلیل کامل ۱۲ اصل GEMINI.md و ترفندهای حرفه‌ای کار با ایجنت‌ها."
 categories: [AI, Architecture, Tool]
 tags: [antigravity, ai-agent, mcp, model-context-protocol, skills, iran-mcp, gemini-md, clean-code, devops, chirpy]
