@@ -1,5 +1,5 @@
 ---
-title: "راهنمای جامع Honeypot و تکنیک‌های فریب (Deception): ماتریس تله‌گذاری و پیاده‌سازی عمیق ۳ هانی‌پات استراتژیک"
+title: "راهنمای جامع Honeypot و تکنیک‌های فریب Deception"
 description: "ماتریس جامع تله‌گذاری در لایه‌های شبکه، زیرساخت، سرور، کلود، کانتینر، دیتابیس، بک‌اند و فرانت‌اند، به همراه راهنمای پیاده‌سازی گام‌به‌گام و تحلیل فارنزیک ۳ هانی‌پات کلیدی."
 categories: [security, devsecops]
 tags: [honeypot, deception-technology, network-security, canarytokens, aws-security, blue-team, devsecops, intrusion-detection]
